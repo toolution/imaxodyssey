@@ -182,12 +182,13 @@
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid var(--voyage-gold);
-  border-radius: 50%;
-  color: var(--voyage-gold);
+  overflow: hidden;
+  border-radius: 6px;
 }
-.voyage-brand-mark svg {
-  width: 20px;
+.voyage-brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .voyage-method-link {
   gap: 7px;

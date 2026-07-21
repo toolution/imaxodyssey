@@ -197,7 +197,7 @@ export function VoyageExperience({ copy }: { copy: VoyageCopy }) {
       <header className="voyage-header">
         <a className="voyage-brand" href="/" aria-label={copy.brand}>
           <span className="voyage-brand-mark">
-            <Compass aria-hidden="true" />
+            <img src="/favicon.png" alt="" aria-hidden="true" />
           </span>
           <span>{copy.brand}</span>
         </a>
