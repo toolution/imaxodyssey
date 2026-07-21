@@ -33,7 +33,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY . .
-RUN pnpm build
+# Some platforms (including Zeabur) inject NITRO_OUTPUT_DIR and redirect the
+# build into a platform-specific folder. Keep the container artifact path
+# stable because the runner stage and `pnpm start` both expect `.output`.
+RUN NITRO_OUTPUT_DIR=/app/.output pnpm build
 
 # Production image — run the nitro server output
 FROM base AS runner
