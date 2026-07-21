@@ -33,10 +33,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY . .
-# Some platforms (including Zeabur) inject NITRO_OUTPUT_DIR and redirect the
-# build into a platform-specific folder. Keep the container artifact path
-# stable because the runner stage and `pnpm start` both expect `.output`.
-RUN NITRO_OUTPUT_DIR=/app/.output pnpm build
+# Zeabur sets ZEABUR=1, which makes Nitro auto-select its serverless preset
+# and write to .zeabur/output. This Docker image runs the Node server output,
+# so explicitly select the matching preset and keep the artifact at .output.
+RUN NITRO_PRESET=node-server pnpm build
 
 # Production image — run the nitro server output
 FROM base AS runner
