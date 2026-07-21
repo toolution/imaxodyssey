@@ -1,7 +1,12 @@
+import { envConfigs } from '@/config';
 import { m } from '@/paraglide/messages.js';
+import { getLocale, localizeUrl } from '@/paraglide/runtime.js';
 import { VoyageExperience } from '@/components/voyage-experience';
 
 export function Voyage() {
+  const locale = getLocale();
+  const canonicalUrl = localizeUrl(`${envConfigs.app_url}/`, { locale }).href;
+
   return (
     <VoyageExperience
       copy={{
@@ -77,6 +82,110 @@ export function Voyage() {
         noResultsBody: m['voyage.empty.body'](),
         disclaimer: m['voyage.disclaimer'](),
         dataNote: m['voyage.data_note'](),
+      }}
+      seo={{
+        canonicalUrl,
+        language: locale,
+        siteName: envConfigs.app_name,
+        metaDescription: m['voyage.metadata.description'](),
+        eyebrow: m['voyage.seo.eyebrow'](),
+        title: m['voyage.seo.title'](),
+        introduction: [m['voyage.seo.intro.1'](), m['voyage.seo.intro.2']()],
+        sections: [
+          {
+            title: m['voyage.seo.find.title'](),
+            paragraphs: [m['voyage.seo.find.1'](), m['voyage.seo.find.2']()],
+          },
+          {
+            title: m['voyage.seo.formats.title'](),
+            paragraphs: [m['voyage.seo.formats.intro']()],
+            items: [
+              {
+                title: m['voyage.seo.formats.1570.title'](),
+                body: m['voyage.seo.formats.1570.body'](),
+              },
+              {
+                title: m['voyage.seo.formats.gt.title'](),
+                body: m['voyage.seo.formats.gt.body'](),
+              },
+              {
+                title: m['voyage.seo.formats.digital.title'](),
+                body: m['voyage.seo.formats.digital.body'](),
+              },
+            ],
+          },
+          {
+            title: m['voyage.seo.choose.title'](),
+            paragraphs: [
+              m['voyage.seo.choose.1'](),
+              m['voyage.seo.choose.2'](),
+            ],
+            items: [
+              {
+                title: m['voyage.seo.choose.item1.title'](),
+                body: m['voyage.seo.choose.item1.body'](),
+              },
+              {
+                title: m['voyage.seo.choose.item2.title'](),
+                body: m['voyage.seo.choose.item2.body'](),
+              },
+              {
+                title: m['voyage.seo.choose.item3.title'](),
+                body: m['voyage.seo.choose.item3.body'](),
+              },
+              {
+                title: m['voyage.seo.choose.item4.title'](),
+                body: m['voyage.seo.choose.item4.body'](),
+              },
+            ],
+          },
+          {
+            title: m['voyage.seo.screenings.title'](),
+            paragraphs: [
+              m['voyage.seo.screenings.1'](),
+              m['voyage.seo.screenings.2'](),
+            ],
+          },
+          {
+            title: m['voyage.seo.route.title'](),
+            paragraphs: [m['voyage.seo.route.1'](), m['voyage.seo.route.2']()],
+          },
+          {
+            title: m['voyage.seo.verify.title'](),
+            paragraphs: [
+              m['voyage.seo.verify.1'](),
+              m['voyage.seo.verify.2'](),
+            ],
+          },
+        ],
+        faqTitle: m['voyage.seo.faq.title'](),
+        faqDescription: m['voyage.seo.faq.description'](),
+        faqs: [
+          {
+            question: m['voyage.seo.faq.1.question'](),
+            answer: m['voyage.seo.faq.1.answer'](),
+          },
+          {
+            question: m['voyage.seo.faq.2.question'](),
+            answer: m['voyage.seo.faq.2.answer'](),
+          },
+          {
+            question: m['voyage.seo.faq.3.question'](),
+            answer: m['voyage.seo.faq.3.answer'](),
+          },
+          {
+            question: m['voyage.seo.faq.4.question'](),
+            answer: m['voyage.seo.faq.4.answer'](),
+          },
+          {
+            question: m['voyage.seo.faq.5.question'](),
+            answer: m['voyage.seo.faq.5.answer'](),
+          },
+          {
+            question: m['voyage.seo.faq.6.question'](),
+            answer: m['voyage.seo.faq.6.answer'](),
+          },
+        ],
       }}
     />
   );

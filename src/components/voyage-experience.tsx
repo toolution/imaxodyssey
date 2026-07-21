@@ -83,6 +83,24 @@ export interface VoyageCopy {
   dataNote: string;
 }
 
+export interface VoyageSeoCopy {
+  canonicalUrl: string;
+  language: string;
+  siteName: string;
+  metaDescription: string;
+  eyebrow: string;
+  title: string;
+  introduction: string[];
+  sections: Array<{
+    title: string;
+    paragraphs: string[];
+    items?: Array<{ title: string; body: string }>;
+  }>;
+  faqTitle: string;
+  faqDescription: string;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
 const missionOrder: VoyageMission[] = [
   'closest',
   'best-format',
@@ -134,7 +152,13 @@ const initialResult: VoyageSearchResult = {
   usedEstimatedRoutes: false,
 };
 
-export function VoyageExperience({ copy }: { copy: VoyageCopy }) {
+export function VoyageExperience({
+  copy,
+  seo,
+}: {
+  copy: VoyageCopy;
+  seo: VoyageSeoCopy;
+}) {
   const [result, setResult] = useState<VoyageSearchResult | null>(
     initialResult
   );
@@ -213,8 +237,7 @@ export function VoyageExperience({ copy }: { copy: VoyageCopy }) {
             <p className="voyage-eyebrow">
               <Anchor aria-hidden="true" /> {copy.eyebrow}
             </p>
-            <h1 id="voyage-title">{copy.brand}</h1>
-            <p className="voyage-question">{copy.headline}</p>
+            <h1 id="voyage-title">{copy.headline}</h1>
             <p className="voyage-subheadline">{copy.subheadline}</p>
           </div>
 
@@ -366,6 +389,8 @@ export function VoyageExperience({ copy }: { copy: VoyageCopy }) {
           </div>
           <p>{copy.dataNote}</p>
         </section>
+
+        <SeoGuide copy={seo} />
       </main>
 
       <footer className="voyage-footer">
@@ -385,7 +410,114 @@ export function VoyageExperience({ copy }: { copy: VoyageCopy }) {
           }}
         />
       ) : null}
+      <SeoSchema copy={seo} />
     </div>
+  );
+}
+
+function SeoGuide({ copy }: { copy: VoyageSeoCopy }) {
+  return (
+    <section className="voyage-seo" aria-labelledby="voyage-seo-title">
+      <div className="voyage-seo-intro">
+        <p className="voyage-eyebrow">{copy.eyebrow}</p>
+        <h2 id="voyage-seo-title">{copy.title}</h2>
+        {copy.introduction.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+      </div>
+
+      <div className="voyage-seo-sections">
+        {copy.sections.map((section) => (
+          <section key={section.title}>
+            <h2>{section.title}</h2>
+            {section.paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+            {section.items ? (
+              <div className="voyage-seo-items">
+                {section.items.map((item) => (
+                  <div key={item.title}>
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </section>
+        ))}
+      </div>
+
+      <section className="voyage-faq" aria-labelledby="voyage-faq-title">
+        <div>
+          <p className="voyage-eyebrow">FAQ</p>
+          <h2 id="voyage-faq-title">{copy.faqTitle}</h2>
+          <p>{copy.faqDescription}</p>
+        </div>
+        <div className="voyage-faq-list">
+          {copy.faqs.map((faq) => (
+            <details key={faq.question}>
+              <summary>{faq.question}</summary>
+              <p>{faq.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    </section>
+  );
+}
+
+function SeoSchema({ copy }: { copy: VoyageSeoCopy }) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${copy.canonicalUrl}#website`,
+        url: copy.canonicalUrl,
+        name: copy.siteName,
+        description: copy.metaDescription,
+        inLanguage: copy.language,
+      },
+      {
+        '@type': 'WebApplication',
+        '@id': `${copy.canonicalUrl}#application`,
+        url: copy.canonicalUrl,
+        name: copy.title,
+        description: copy.metaDescription,
+        applicationCategory: 'EntertainmentApplication',
+        operatingSystem: 'Any',
+        browserRequirements: 'Requires JavaScript and a modern web browser.',
+        isAccessibleForFree: true,
+        inLanguage: copy.language,
+        about: {
+          '@type': 'Thing',
+          name: 'The Odyssey IMAX 70mm',
+        },
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${copy.canonicalUrl}#faq`,
+        url: copy.canonicalUrl,
+        inLanguage: copy.language,
+        mainEntity: copy.faqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.answer,
+          },
+        })),
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(schema).replace(/</g, '\\u003c'),
+      }}
+    />
   );
 }
 

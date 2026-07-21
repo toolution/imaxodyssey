@@ -17,12 +17,13 @@ function urlFor(path: string, locale: string): string {
 }
 
 function entryXml(e: Entry): string {
-  const alternates = locales
-    .map(
+  const alternates = [
+    ...locales.map(
       (loc) =>
         `    <xhtml:link rel="alternate" hreflang="${loc}" href="${urlFor(e.path, loc)}"/>`
-    )
-    .join('\n');
+    ),
+    `    <xhtml:link rel="alternate" hreflang="x-default" href="${urlFor(e.path, baseLocale)}"/>`,
+  ].join('\n');
   return [
     '  <url>',
     `    <loc>${urlFor(e.path, baseLocale)}</loc>`,
