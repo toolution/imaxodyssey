@@ -11,6 +11,7 @@
 # tanstack start / vite / nitro
 /.next/
 /.output/
+/.output-verify/
 /.nitro/
 /.tanstack/
 /dist/

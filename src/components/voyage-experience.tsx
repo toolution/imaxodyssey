@@ -221,7 +221,7 @@ export function VoyageExperience({
       <header className="voyage-header">
         <a className="voyage-brand" href="/" aria-label={copy.brand}>
           <span className="voyage-brand-mark">
-            <img src="/favicon.png" alt="" aria-hidden="true" />
+            <img src="/favicon.png" alt={copy.brand} aria-hidden="true" />
           </span>
           <span>{copy.brand}</span>
         </a>
@@ -577,13 +577,11 @@ function OdysseyMap({
     >
       <div className="map-tiles" aria-hidden="true">
         {projected.tiles.map((tile) => (
-          <img
+          <span
             key={`${tile.z}-${tile.x}-${tile.y}`}
             className="map-tile"
-            src={`/api/voyage/tile?z=${tile.z}&x=${tile.x}&y=${tile.y}`}
-            alt=""
-            draggable={false}
             style={{
+              backgroundImage: `url("/api/voyage/tile?z=${tile.z}&x=${tile.x}&y=${tile.y}")`,
               left: `${tile.left / 10}%`,
               top: `${(tile.top / 520) * 100}%`,
               width: `${tile.size / 10}%`,
