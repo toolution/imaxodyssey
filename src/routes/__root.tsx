@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import type { ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import {
@@ -18,15 +18,20 @@ import { getQueryClient } from '@/lib/query-client';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { GoogleAnalytics } from '@/components/analytics/google-analytics';
 import { Plausible } from '@/components/analytics/plausible';
-import { CustomerService } from '@/components/customer-service';
-import { GoogleOneTap } from '@/components/google-one-tap';
 import { Toaster } from '@/components/ui/sonner';
 
-import '@fontsource-variable/inter';
-import '@fontsource/libre-baskerville/400.css';
-import '@fontsource/libre-baskerville/700.css';
-import '@fontsource/libre-baskerville/400-italic.css';
 import '@/styles/globals.css';
+
+const LazyGoogleOneTap = lazy(() =>
+  import('@/components/google-one-tap').then((module) => ({
+    default: module.GoogleOneTap,
+  }))
+);
+const LazyCustomerService = lazy(() =>
+  import('@/components/customer-service').then((module) => ({
+    default: module.CustomerService,
+  }))
+);
 
 // Analytics IDs live in the DB config (1h-cached service). Fetched via a
 // server function so drizzle/db code never reaches the client bundle.
@@ -75,16 +80,6 @@ export const Route = createRootRoute({
         { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
         { rel: 'icon', href: '/favicon.png', type: 'image/png' },
         { rel: 'apple-touch-icon', href: '/favicon.png' },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        {
-          rel: 'preconnect',
-          href: 'https://fonts.gstatic.com',
-          crossOrigin: 'anonymous',
-        },
-        {
-          rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Marcellus&display=swap',
-        },
         ...locales.map((loc) => ({
           rel: 'alternate',
           hrefLang: loc,
@@ -112,7 +107,11 @@ function RootComponent() {
       >
         <Outlet />
         <Toaster position="top-center" richColors />
-        <GoogleOneTap />
+        <DeferredClientIntegrations
+          crispWebsiteId={analytics?.crispWebsiteId || undefined}
+          tawkPropertyId={analytics?.tawkPropertyId || undefined}
+          tawkWidgetId={analytics?.tawkWidgetId || undefined}
+        />
         {analytics?.gaId ? (
           <GoogleAnalytics measurementId={analytics.gaId} />
         ) : null}
@@ -122,14 +121,44 @@ function RootComponent() {
             src={analytics.plausibleSrc || undefined}
           />
         ) : null}
-        <CustomerService
-          crispWebsiteId={analytics?.crispWebsiteId || undefined}
-          tawkPropertyId={analytics?.tawkPropertyId || undefined}
-          tawkWidgetId={analytics?.tawkWidgetId || undefined}
-        />
       </ThemeProvider>
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
+  );
+}
+
+function DeferredClientIntegrations({
+  crispWebsiteId,
+  tawkPropertyId,
+  tawkWidgetId,
+}: {
+  crispWebsiteId?: string;
+  tawkPropertyId?: string;
+  tawkWidgetId?: string;
+}) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setReady(true), 2000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (!ready) return null;
+
+  const hasCustomerService =
+    Boolean(crispWebsiteId) || Boolean(tawkPropertyId && tawkWidgetId);
+
+  return (
+    <Suspense fallback={null}>
+      <LazyGoogleOneTap />
+      {hasCustomerService ? (
+        <LazyCustomerService
+          crispWebsiteId={crispWebsiteId}
+          tawkPropertyId={tawkPropertyId}
+          tawkWidgetId={tawkWidgetId}
+        />
+      ) : null}
+    </Suspense>
   );
 }
 

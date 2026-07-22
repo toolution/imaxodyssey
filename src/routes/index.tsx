@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
-import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { Voyage } from '@/blocks/voyage';
+import * as m from '@/blocks/voyage-messages';
 
 /**
  * Default landing page — demo content. Rewrite this file (and the blocks in

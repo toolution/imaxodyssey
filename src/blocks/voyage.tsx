@@ -1,6 +1,6 @@
 import { envConfigs } from '@/config';
-import { m } from '@/paraglide/messages.js';
 import { getLocale, localizeUrl } from '@/paraglide/runtime.js';
+import * as m from '@/blocks/voyage-messages';
 import { VoyageExperience } from '@/components/voyage-experience';
 
 export function Voyage() {

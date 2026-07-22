@@ -771,7 +771,7 @@ function TheaterIsland({
           <p>
             {theater.city}, {theater.region}
           </p>
-          <h3>{theater.name}</h3>
+          <h2>{theater.name}</h2>
           <div className="theater-journey">
             <strong>{formatDistance(route.distanceMeters, country)}</strong>
             <span>{formatDuration(route.durationSeconds)}</span>
