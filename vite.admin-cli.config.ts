@@ -9,15 +9,19 @@ export default defineConfig({
     copyPublicDir: false,
     emptyOutDir: false,
     outDir: '.output/server',
-    ssr: 'scripts/init-rbac.ts',
+    ssr: true,
     target: 'node22',
     rollupOptions: {
+      input: {
+        'init-rbac': 'scripts/init-rbac.ts',
+        'migrate-db': 'scripts/migrate-db.ts',
+      },
       external: [
         ...builtinModules,
         ...builtinModules.map((moduleName) => `node:${moduleName}`),
       ],
       output: {
-        entryFileNames: 'init-rbac.mjs',
+        entryFileNames: '[name].mjs',
       },
     },
   },

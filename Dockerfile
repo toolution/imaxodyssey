@@ -49,6 +49,7 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 appuser
 
 COPY --from=builder --chown=appuser:nodejs /app/.output ./.output
+COPY --from=builder --chown=appuser:nodejs /app/drizzle ./drizzle
 
 USER appuser
 

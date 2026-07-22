@@ -18,7 +18,6 @@ src/paraglide
 
 # local database
 data
-drizzle
 
 # vcs / editors / tooling
 .git
