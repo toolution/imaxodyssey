@@ -7,6 +7,7 @@
  *   pnpm rbac:init
  *   pnpm rbac:init --admin-email=admin@example.com
  *   pnpm rbac:init --admin-email=admin@example.com --admin-password=your-password
+ *   ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=your-password pnpm rbac:init
  */
 
 import { hashPassword } from 'better-auth/crypto';
@@ -336,6 +337,19 @@ const defaultRoles = [
 ];
 
 async function initializeRBAC() {
+  const args = process.argv.slice(2);
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`Usage:
+  node init-rbac.mjs
+  node init-rbac.mjs --admin-email=admin@example.com
+  node init-rbac.mjs --admin-email=admin@example.com --admin-password=your-password
+
+Environment variables:
+  ADMIN_EMAIL       Admin email address
+  ADMIN_PASSWORD    Password used when creating a new admin user`);
+    return;
+  }
+
   console.log('Starting RBAC initialization...\n');
 
   const provider = process.env.DATABASE_PROVIDER || 'sqlite';
@@ -433,16 +447,17 @@ async function initializeRBAC() {
     console.log(`\nRoles: ${Object.keys(createdRoles).length}\n`);
 
     // 3. Create admin user and/or assign super_admin role
-    const args = process.argv.slice(2);
     const adminEmailArg = args.find((arg) => arg.startsWith('--admin-email='));
     const adminPasswordArg = args.find((arg) =>
       arg.startsWith('--admin-password=')
     );
+    const adminEmail =
+      adminEmailArg?.slice('--admin-email='.length) || process.env.ADMIN_EMAIL;
+    const adminPassword =
+      adminPasswordArg?.slice('--admin-password='.length) ||
+      process.env.ADMIN_PASSWORD;
 
-    if (adminEmailArg) {
-      const adminEmail = adminEmailArg.split('=')[1];
-      const adminPassword = adminPasswordArg?.split('=')[1];
-
+    if (adminEmail) {
       let [adminUser] = await db
         .select()
         .from(schema.user)

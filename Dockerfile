@@ -37,6 +37,9 @@ COPY . .
 # and write to .zeabur/output. This Docker image runs the Node server output,
 # so explicitly select the matching preset and keep the artifact at .output.
 RUN NITRO_PRESET=node-server pnpm build
+# Keep the RBAC bootstrap available in the minimal runtime image without
+# copying the source tree or package manager into production.
+RUN pnpm exec vite build --config vite.admin-cli.config.ts
 
 # Production image — run the nitro server output
 FROM base AS runner
