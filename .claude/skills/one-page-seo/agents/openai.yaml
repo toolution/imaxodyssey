@@ -1,0 +1,5 @@
+interface:
+  display_name: "One Page SEO"
+  short_description: "Audit and optimize one page for one keyword"
+  default_prompt: "Use $one-page-seo to audit this URL for the supplied primary keyword and provide a scored Chinese report with exact fixes."
+

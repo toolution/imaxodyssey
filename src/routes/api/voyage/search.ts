@@ -25,7 +25,7 @@ async function POST({ request }: { request: Request }) {
       typeof body?.departure === 'string' ? body.departure.trim() : '';
     const mission = body?.mission as VoyageMission;
     if (departure.length < 2 || departure.length > 120)
-      return respErr('Enter a city or ZIP code.');
+      return respErr('Enter a city or postal code.');
     if (!missions.includes(mission)) return respErr('Choose a voyage mission.');
     return respData(await searchVoyages(departure, mission), {
       headers: { 'Cache-Control': 'private, no-store' },

@@ -82,6 +82,7 @@ export function Voyage() {
         noResultsBody: m['voyage.empty.body'](),
         disclaimer: m['voyage.disclaimer'](),
         dataNote: m['voyage.data_note'](),
+        dataCredit: m['voyage.data_credit'](),
       }}
       seo={{
         canonicalUrl,

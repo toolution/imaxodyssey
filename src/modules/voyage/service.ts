@@ -20,6 +20,17 @@ interface RankedCandidate {
   formatScore: number;
 }
 
+const cityCoordinateUncertainty = {
+  distanceMeters: 8_000,
+  durationSeconds: 15 * 60,
+};
+
+function coordinateUncertainty(theater: TheaterCapability) {
+  return theater.coordinatePrecision === 'city'
+    ? cityCoordinateUncertainty
+    : { distanceMeters: 0, durationSeconds: 0 };
+}
+
 export function adventureTier(durationSeconds: number): AdventureTier {
   const minutes = durationSeconds / 60;
   if (minutes < 30) return 'athenas-favor';
@@ -44,6 +55,7 @@ export function formatScore(theater: TheaterCapability) {
 }
 
 function appliesToMission(theater: TheaterCapability, mission: VoyageMission) {
+  if (theater.commercialFilms === 'no') return false;
   if (mission === '70mm-only') return theater.has1570;
   return true;
 }
@@ -73,24 +85,36 @@ async function hydrateRoute(
   candidate: RankedCandidate,
   kind: 'shortest' | 'hero',
   origin: [number, number],
-  originRegion: string
+  originRegion: string,
+  originCountry: string
 ): Promise<VoyageRoute> {
   const destination: [number, number] = [
     candidate.theater.longitude,
     candidate.theater.latitude,
   ];
   const routed = await drivingRoute(origin, destination);
+  const uncertainty = coordinateUncertainty(candidate.theater);
+  const distanceMeters =
+    routed.metric.distanceMeters + uncertainty.distanceMeters;
+  const durationSeconds =
+    routed.metric.durationSeconds + uncertainty.durationSeconds;
   return {
     kind,
     theater: candidate.theater,
-    distanceMeters: routed.metric.distanceMeters,
-    durationSeconds: routed.metric.durationSeconds,
+    distanceMeters,
+    durationSeconds,
     geometry: routed.geometry,
-    estimated: routed.estimated,
+    estimated:
+      routed.estimated || candidate.theater.coordinatePrecision === 'city',
     regionCount: new Set(
-      [originRegion, candidate.theater.region].filter(Boolean)
+      [
+        [originCountry, originRegion].filter(Boolean).join(':'),
+        [candidate.theater.country, candidate.theater.region]
+          .filter(Boolean)
+          .join(':'),
+      ].filter(Boolean)
     ).size,
-    adventureTier: adventureTier(routed.metric.durationSeconds),
+    adventureTier: adventureTier(durationSeconds),
     formatScore: candidate.formatScore,
   };
 }
@@ -103,16 +127,22 @@ export async function searchVoyages(
   const origin: [number, number] = [port.longitude, port.latitude];
   const eligible = theaterCatalog
     .filter((theater) => appliesToMission(theater, mission))
-    .map((theater) => ({
-      theater,
-      directMeters: haversineMeters(
+    .map((theater) => {
+      const uncertainty = coordinateUncertainty(theater);
+      const directMeters = haversineMeters(
         port.latitude,
         port.longitude,
         theater.latitude,
         theater.longitude
-      ),
-    }))
-    .sort((a, b) => a.directMeters - b.directMeters)
+      );
+      return {
+        theater,
+        directMeters,
+        uncertainty,
+        rankingMeters: directMeters + uncertainty.distanceMeters,
+      };
+    })
+    .sort((a, b) => a.rankingMeters - b.rankingMeters)
     .slice(0, 23);
 
   if (!eligible.length)
@@ -124,14 +154,20 @@ export async function searchVoyages(
     eligible.map(({ theater }) => [theater.longitude, theater.latitude])
   );
   const ranked: RankedCandidate[] = eligible
-    .map(({ theater, directMeters }, index) => ({
-      theater,
-      distanceMeters: metrics[index]?.distanceMeters ?? directMeters * 1.2,
-      durationSeconds:
-        metrics[index]?.durationSeconds ??
-        ((directMeters * 1.2) / 1609.344 / 55) * 3600,
-      formatScore: formatScore(theater),
-    }))
+    .map(({ theater, directMeters, uncertainty }, index) => {
+      const estimatedDistance = directMeters * 1.2;
+      return {
+        theater,
+        distanceMeters:
+          (metrics[index]?.distanceMeters ?? estimatedDistance) +
+          uncertainty.distanceMeters,
+        durationSeconds:
+          (metrics[index]?.durationSeconds ??
+            (estimatedDistance / 1609.344 / 55) * 3600) +
+          uncertainty.durationSeconds,
+        formatScore: formatScore(theater),
+      };
+    })
     .sort((a, b) => a.durationSeconds - b.durationSeconds);
 
   const shortest = ranked[0];
@@ -140,11 +176,14 @@ export async function searchVoyages(
     shortest,
     'shortest',
     origin,
-    port.region
+    port.region,
+    port.country
   );
   const routes = [shortestRoute];
   if (hero.theater.id !== shortest.theater.id)
-    routes.push(await hydrateRoute(hero, 'hero', origin, port.region));
+    routes.push(
+      await hydrateRoute(hero, 'hero', origin, port.region, port.country)
+    );
 
   return {
     departure: port,

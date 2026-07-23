@@ -3,7 +3,7 @@ import { envConfigs } from '@/config';
 export interface GeocodedPort {
   city: string;
   region: string;
-  country: 'US' | 'CA';
+  country: string;
   latitude: number;
   longitude: number;
 }
@@ -107,6 +107,34 @@ const demoPorts: Record<string, GeocodedPort> = {
     latitude: 51.0447,
     longitude: -114.0719,
   },
+  london: {
+    city: 'London',
+    region: 'England',
+    country: 'GB',
+    latitude: 51.5074,
+    longitude: -0.1278,
+  },
+  tokyo: {
+    city: 'Tokyo',
+    region: 'Tokyo',
+    country: 'JP',
+    latitude: 35.6762,
+    longitude: 139.6503,
+  },
+  sydney: {
+    city: 'Sydney',
+    region: 'NSW',
+    country: 'AU',
+    latitude: -33.8688,
+    longitude: 151.2093,
+  },
+  singapore: {
+    city: 'Singapore',
+    region: '',
+    country: 'SG',
+    latitude: 1.3521,
+    longitude: 103.8198,
+  },
 };
 
 function mapTilerKey() {
@@ -120,7 +148,7 @@ export async function geocodePort(query: string): Promise<GeocodedPort> {
   const apiKey = mapTilerKey();
   if (!apiKey) {
     throw new Error(
-      'MapTiler is not configured. Try New York, Los Angeles, Toronto, or add MAPTILER_API_KEY.'
+      'MapTiler is not configured. Try New York, London, Tokyo, Sydney, Singapore, or add MAPTILER_API_KEY.'
     );
   }
 
@@ -128,10 +156,9 @@ export async function geocodePort(query: string): Promise<GeocodedPort> {
     `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json`
   );
   url.searchParams.set('key', apiKey);
-  url.searchParams.set('country', 'us,ca');
   url.searchParams.set(
     'types',
-    'postal_code,place,municipality,locality,address'
+    'postal_code,place,municipality,locality,county,subregion,region'
   );
   url.searchParams.set('limit', '1');
 
@@ -143,9 +170,7 @@ export async function geocodePort(query: string): Promise<GeocodedPort> {
   const feature = data.features?.[0];
   const coordinates = feature?.center ?? feature?.geometry?.coordinates;
   if (!Array.isArray(coordinates)) {
-    throw new Error(
-      'No departure port was found in the United States or Canada.'
-    );
+    throw new Error('No departure location was found.');
   }
 
   const contexts = [feature, ...(feature.context ?? [])];
@@ -165,33 +190,42 @@ export async function geocodePort(query: string): Promise<GeocodedPort> {
         ['place', 'municipality', 'locality'].includes(type)
       )
   );
+  const featureTypes = Array.isArray(feature.place_type)
+    ? feature.place_type
+    : [];
+  const queryCity = query.split(',')[0]?.trim();
   const rawCountry =
     properties.country_code ??
     feature.country_code ??
     countryContext?.properties?.country_code ??
     countryContext?.short_code ??
     '';
-  const country = String(rawCountry).split('-').pop()?.toUpperCase();
-  if (country !== 'US' && country !== 'CA') {
-    throw new Error(
-      'This voyage currently sails only in the United States and Canada.'
-    );
-  }
+  const country = String(rawCountry).split('-').pop()?.toUpperCase() || 'XX';
 
   const rawRegion =
     properties.state_code ??
     properties.region_code ??
     regionContext?.properties?.state_code ??
     regionContext?.short_code ??
+    regionContext?.text ??
+    regionContext?.place_name ??
     '';
+  const regionText = String(rawRegion);
+  const region = /^[a-z]{2,3}-[a-z0-9]+$/i.test(regionText)
+    ? (regionText.split('-').pop() ?? '')
+    : regionText;
   return {
     city:
-      placeContext?.text ??
-      placeContext?.place_name ??
-      feature.text ??
-      feature.place_name?.split(',')[0] ??
-      query,
-    region: String(rawRegion).split('-').pop()?.toUpperCase() ?? '',
+      featureTypes.some((type: string) =>
+        ['county', 'subregion', 'region'].includes(type)
+      ) && queryCity
+        ? queryCity
+        : (placeContext?.text ??
+          placeContext?.place_name ??
+          feature.text ??
+          feature.place_name?.split(',')[0] ??
+          query),
+    region,
     country,
     longitude: Number(coordinates[0]),
     latitude: Number(coordinates[1]),

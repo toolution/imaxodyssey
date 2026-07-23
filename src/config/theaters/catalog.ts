@@ -1,8 +1,10 @@
 import type { TheaterCapability } from '@/lib/voyage';
 
+import { imaxGuideCatalog } from './imaxguide';
+
 // Curated launch catalog. Capability and screening confirmation are separate:
 // a venue can own 15/70 equipment without a confirmed Odyssey engagement.
-export const theaterCatalog: TheaterCapability[] = [
+const curatedTheaterCatalog: TheaterCapability[] = [
   {
     id: 'amc-lincoln-square-13',
     name: 'AMC Lincoln Square 13',
@@ -633,3 +635,51 @@ export const theaterCatalog: TheaterCapability[] = [
     confidence: 'medium',
   },
 ];
+
+const replacementIds = new Set([
+  'imaxguide-us-reading-sunbrella-imax-3d-theater-reading',
+]);
+
+function theaterNameTokens(value: string) {
+  return new Set(
+    value
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(
+        /\b(imax|cinema|cinemas|theater|theatre|at|the|of|and|3d|xd)\b/g,
+        ' '
+      )
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+  );
+}
+
+function sameTheater(curated: TheaterCapability, imported: TheaterCapability) {
+  if (curated.country !== imported.country) return false;
+  const curatedTokens = theaterNameTokens(curated.name);
+  const importedTokens = theaterNameTokens(imported.name);
+  const overlap = [...curatedTokens].filter((token) =>
+    importedTokens.has(token)
+  ).length;
+  return (
+    overlap / Math.max(1, Math.min(curatedTokens.size, importedTokens.size)) >=
+    0.75
+  );
+}
+
+export const theaterCatalog: TheaterCapability[] = [
+  ...curatedTheaterCatalog,
+  ...imaxGuideCatalog.filter(
+    (imported) =>
+      !replacementIds.has(imported.id) &&
+      !curatedTheaterCatalog.some((curated) => sameTheater(curated, imported))
+  ),
+].sort(
+  (left, right) =>
+    left.country.localeCompare(right.country) ||
+    left.city.localeCompare(right.city) ||
+    left.name.localeCompare(right.name)
+);

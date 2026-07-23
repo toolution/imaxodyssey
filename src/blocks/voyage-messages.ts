@@ -62,6 +62,7 @@ export * from '@/paraglide/messages/voyage_empty_title.js';
 export * from '@/paraglide/messages/voyage_empty_body.js';
 export * from '@/paraglide/messages/voyage_disclaimer.js';
 export * from '@/paraglide/messages/voyage_data_note.js';
+export * from '@/paraglide/messages/voyage_data_credit.js';
 export * from '@/paraglide/messages/voyage_seo_eyebrow.js';
 export * from '@/paraglide/messages/voyage_seo_title.js';
 export * from '@/paraglide/messages/voyage_seo_intro_1.js';

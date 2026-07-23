@@ -1,0 +1,306 @@
+{
+  "imaxguide-ae-dubai-vox-cinemas-imax": [25.117469, 55.200134],
+  "imaxguide-at-graz-cineplexx-graz-imax": [47.078345, 15.443956],
+  "imaxguide-at-hohenems-cineplexx-hohenems-imax": [47.372698, 9.678048],
+  "imaxguide-at-vienna-cineplexx-donau-plex-imax-vienna": [48.24165, 16.43379],
+  "imaxguide-au-broadbeach-event-cinemas-pacfic-fair": [-27.969017, 153.414893],
+  "imaxguide-au-melbourne-imax-melbourne-museum": [-37.803641, 144.971687],
+  "imaxguide-be-brussels-kinepolis-brussels-imax": [50.895642, 4.337468],
+  "imaxguide-be-charleroi-pathe-charleroi-imax": [50.419168, 4.459971],
+  "imaxguide-be-liege-kinepolis-liege-imax": [50.670335, 5.554748],
+  "imaxguide-br-sao-paulo-cinepolis-iguatemi-imax": [-23.591474, -46.689496],
+  "imaxguide-bs-nassau-fusion-superplex-imax": [25.077434, -77.340663],
+  "imaxguide-ca-coquitlam-cineplex-cinemas-coquitlam-imax": [
+    49.235249, -122.854356
+  ],
+  "imaxguide-ca-edmonton-telus-world-of-science-edmonton-imax-theatre": [
+    53.5611, -113.5634
+  ],
+  "imaxguide-ca-kanata-landmark-cinemas-24-kanata-imax": [45.3095, -75.909],
+  "imaxguide-ca-langley-cineplex-cinemas-langley-imax": [49.16822, -122.66552],
+  "imaxguide-ca-mississauga-cineplex-cinemas-mississauga-imax": [
+    43.63796, -79.69064
+  ],
+  "imaxguide-ca-montreal-cinema-banque-scotia-montreal": [
+    45.501033, -73.572074
+  ],
+  "imaxguide-ca-montreal-cinema-cineplex-forum-et-vip": [45.489843, -73.58489],
+  "imaxguide-ca-quebec-cinema-cineplex-imax-aux-galeries-de-la-capitale": [
+    46.831455, -71.295774
+  ],
+  "imaxguide-ca-sudbury-la-salle-imax-science-north": [46.470773, -80.996026],
+  "imaxguide-ca-whitby-landmark-cinemas-24-whitby-imax": [
+    43.911083, -78.915314
+  ],
+  "imaxguide-ch-chur-blue-cinema-chur-imax": [46.848299, 9.507714],
+  "imaxguide-ch-ebikon-lucerne-pathe-mall-of-switzerland-imax": [
+    47.092503, 8.357591
+  ],
+  "imaxguide-ch-geneva-pathe-balexert-imax": [46.21884, 6.11364],
+  "imaxguide-ch-spreitenbach-pathe-spreitenbach-imax": [47.421, 8.3719],
+  "imaxguide-co-envigado-cine-colombia-viva-envigado-imax": [6.1732, -75.5921],
+  "imaxguide-cz-prague-imax-theatre-palace-flora": [50.081483, 14.428018],
+  "imaxguide-de-karlsruhe-filmpalast-am-zkm-imax": [49.000452, 8.385292],
+  "imaxguide-ec-quito-supercines-riocentro-quito-imax": [-0.19134, -78.480968],
+  "imaxguide-es-madrid-kinepolis-madrid-imax": [40.53008, -3.63967],
+  "imaxguide-fi-helsinki-finnkino-itis-imax": [60.211615, 25.083386],
+  "imaxguide-fr-archamps-gaumont-archamps-imax": [46.13882, 6.12185],
+  "imaxguide-fr-aubiere-pathe-cine-dome-aubiere-imax": [45.756691, 3.144093],
+  "imaxguide-fr-conflans-sainte-honorine-pathe-conflans-imax": [
+    49.003573, 2.077849
+  ],
+  "imaxguide-fr-grenoble-pathe-grenoble-imax": [45.185711, 5.731292],
+  "imaxguide-fr-ivry-sur-seine-cinema-pathe-quai-d-ivry-imax": [
+    48.82425, 2.38833
+  ],
+  "imaxguide-fr-la-valette-du-var-pathe-la-valette-imax": [43.13673, 6.00749],
+  "imaxguide-fr-les-pennes-mirabeau-pathe-plan-de-campagne-imax": [
+    43.408323, 5.320707
+  ],
+  "imaxguide-fr-lieusaint-pathe-carre-senart-imax": [48.6156, 2.5459],
+  "imaxguide-fr-marne-la-vallee-gaumont-disney-village-imax": [
+    48.86897, 2.78306
+  ],
+  "imaxguide-fr-nimes-kinepolis-nimes-imax": [43.8147, 4.3665],
+  "imaxguide-fr-paris-la-geode": [48.894558, 2.388667],
+  "imaxguide-fr-poitiers-futuroscope-kinemax-imax-theatre": [46.6646, 0.3668],
+  "imaxguide-fr-saran-pathe-saran-imax": [47.946318, 1.895811],
+  "imaxguide-fr-toulouse-imax-cite-de-l-espace": [43.58693, 1.493069],
+  "imaxguide-fr-tours-cine-loire-imax": [47.423191, 0.710393],
+  "imaxguide-fr-valenciennes-pathe-valenciennes-imax": [50.34043, 3.51558],
+  "imaxguide-fr-vaulx-en-velin-cinema-pathe-carre-de-soie-imax": [
+    45.764395, 4.921411
+  ],
+  "imaxguide-gb-ashford-cineworld-ashford-imax": [51.16066, 0.87368],
+  "imaxguide-gb-barnsley-cineworld-barnsley-imax": [53.55272, -1.478053],
+  "imaxguide-gb-belfast-cineworld-belfast-imax": [54.6041, -5.9162],
+  "imaxguide-gb-blackpool-the-backlot-imax": [53.83012, -3.038014],
+  "imaxguide-gb-dunfermline-odeon-dunfermline-imax": [56.07814, -3.39493],
+  "imaxguide-gb-gateshead-odeon-gateshead-imax": [54.93802, -1.63782],
+  "imaxguide-gb-glasgow-cineworld-silverburn-imax": [55.8231, -4.34281],
+  "imaxguide-gb-london-bfi-imax-british-film-institute": [51.504769, -0.113627],
+  "imaxguide-gb-london-cineworld-leicester-square-imax": [51.51087, -0.13044],
+  "imaxguide-gb-manchester-odeon-trafford-centre-imax": [53.470722, -2.323057],
+  "imaxguide-gb-norwich-odeon-norwich-imax": [52.6251, 1.305],
+  "imaxguide-gb-rushden-cineworld-rushden-lakes-imax": [52.301655, -0.620139],
+  "imaxguide-gb-sheffield-cineworld-sheffield-imax": [53.402393, -1.41413],
+  "imaxguide-gb-swindon-vue-swindon-imax": [51.565596, -1.751927],
+  "imaxguide-gb-uxbridge-odeon-uxbridge-imax": [51.54515, -0.47571],
+  "imaxguide-gb-watford-cineworld-watford-imax": [51.656041, -0.396131],
+  "imaxguide-gb-york-cineworld-york-imax": [53.983363, -1.05241],
+  "imaxguide-id-cikarang-aeon-mall-deltamas-imax": [-6.3522, 107.1974],
+  "imaxguide-id-east-jakarta-keong-emas-imax": [-6.304468, 106.8907],
+  "imaxguide-id-north-jakarta-kelapa-gading-xxi-imax": [-6.1575, 106.9084],
+  "imaxguide-id-south-jakarta-gandaria-city-xxi-imax": [-6.2438, 106.7836],
+  "imaxguide-id-south-tangerang-bintaro-xchange-2-xxi-imax": [
+    -6.2848, 106.7281
+  ],
+  "imaxguide-id-tangerang-alam-sutera-xxi-imax": [-6.2228, 106.652],
+  "imaxguide-in-ahmedabad-imax-3d-gujarat-science-city": [23.08011, 72.497254],
+  "imaxguide-in-mumbai-miraj-wadala-imax": [19.031428, 72.881058],
+  "imaxguide-in-mumbai-pvr-phoenix-imax": [18.994597, 72.824383],
+  "imaxguide-it-azzano-san-paolo-uci-cinemas-orio-imax": [45.661744, 9.69655],
+  "imaxguide-kw-salmiya-imax-the-scientific-center-kuwait": [
+    29.350507, 48.091315
+  ],
+  "imaxguide-lu-kirchberg-kinepolis-kirchberg-imax": [49.633708, 6.172762],
+  "imaxguide-lv-riga-apollo-kino-imax": [56.946368, 24.116935],
+  "imaxguide-my-kuala-lumpur-gsc-kl-east-mall": [3.118543, 101.676106],
+  "imaxguide-my-kuala-lumpur-tgv-sunway-velocity-imax": [3.127094, 101.72478],
+  "imaxguide-my-kuala-lumpur-tgv-suria-klcc-imax": [3.157423, 101.712145],
+  "imaxguide-my-petaling-jaya-tgv-1-utama-imax": [3.151059, 101.61536],
+  "imaxguide-my-putrajaya-gsc-ioi-city-mall-imax": [2.970276, 101.713245],
+  "imaxguide-nl-arnhem-pathe-arnhem-imax": [51.984128, 5.90358],
+  "imaxguide-nl-eindhoven-pathe-eindhoven-imax": [51.44059, 5.48105],
+  "imaxguide-nl-rotterdam-pathe-schouwburgplein-imax": [51.92083, 4.4734],
+  "imaxguide-nl-tilburg-pathe-tilburg-imax": [51.558021, 5.089508],
+  "imaxguide-no-oslo-odeon-oslo-imax": [59.9477, 10.77217],
+  "imaxguide-nz-auckland-event-cinemas-queen-street-imax": [
+    -36.851529, 174.763851
+  ],
+  "imaxguide-ph-las-pinas-vista-cinemas-imax": [14.451055, 120.978553],
+  "imaxguide-pl-krakow-cinema-city-zakopianka-imax": [50.016259, 19.930479],
+  "imaxguide-pt-lisbon-cinema-nos-colombo-imax": [38.75512, -9.18706],
+  "imaxguide-sa-al-khobar-science-dome-sultan-bin-abdulaziz-science-technology-center": [
+    26.319334, 50.228266
+  ],
+  "imaxguide-se-gothenburg-filmstaden-bergakungen-imax": [57.670495, 11.872479],
+  "imaxguide-se-uppsala-filmstaden-luxe-uppsala-imax": [59.861002, 17.63754],
+  "imaxguide-sg-changi-shaw-theatres-jewel-imax": [1.31749, 103.892816],
+  "imaxguide-sg-geylang-shaw-paya-lebar-quarter-imax": [1.31749, 103.892816],
+  "imaxguide-sg-orchard-shaw-theatres-lido-imax": [1.305514, 103.831658],
+  "imaxguide-th-bangkok-bangkapi-cineplex-imax": [13.769344, 100.64406],
+  "imaxguide-th-bangkok-imax-at-icon-cineconic-iconsiam": [
+    13.726504, 100.510101
+  ],
+  "imaxguide-th-bangkok-imax-major-cineplex-central-pinklao": [
+    13.777856, 100.476067
+  ],
+  "imaxguide-th-bangkok-imax-major-cineplex-ratchayothin": [
+    13.828279, 100.568403
+  ],
+  "imaxguide-th-bangkok-krungsri-imax-paragon-cineplex": [13.74609, 100.539697],
+  "imaxguide-th-bangkok-toyota-imax-theatre-quartier-cine-art": [
+    13.732362, 100.569836
+  ],
+  "imaxguide-th-chiang-mai-imax-major-cineplex-central-festival-chiangmai": [
+    18.80648, 99.018125
+  ],
+  "imaxguide-th-nonthaburi-esplanade-cineplex-ngamwongwan-khaerai-imax": [
+    13.860048, 100.518529
+  ],
+  "imaxguide-th-nonthaburi-westgate-cineplex-imax": [13.877821, 100.410411],
+  "imaxguide-th-samut-prakan-imax-mega-cineplex-at-mega-bangna": [
+    13.647953, 100.679381
+  ],
+  "imaxguide-tw-jiayi-city-in89-cinemax-chiayi-imax": [23.4764, 120.4527],
+  "imaxguide-tw-kaohsiung-kaohsiung-vie-show-imax": [22.6131, 120.3041],
+  "imaxguide-us-alexandria-amc-hoffman-center-22-imax": [38.802053, -77.071946],
+  "imaxguide-us-alhambra-regal-edwards-alhambra-renaissance-imax": [
+    34.096201, -118.1267
+  ],
+  "imaxguide-us-aliso-viejo-regal-edwards-aliso-viejo-imax": [
+    33.57661, -117.72702
+  ],
+  "imaxguide-us-ashburn-regal-fox-imax": [38.98434, -77.53771],
+  "imaxguide-us-atlanta-regal-atlantic-station-imax": [33.7938, -84.396],
+  "imaxguide-us-austin-evo-cinemas-belterra-village-imax": [
+    30.204204, -97.977586
+  ],
+  "imaxguide-us-austin-imax-the-bullock-texas-state-history-museum": [
+    30.280308, -97.738758
+  ],
+  "imaxguide-us-balboa-park-fleet-science-center": [32.731051, -117.147009],
+  "imaxguide-us-baytown-showbiz-cinemas-baytown-imax": [29.819346, -94.895633],
+  "imaxguide-us-boise-regal-edwards-boise-imax": [43.589629, -116.277873],
+  "imaxguide-us-boston-mugar-omni-museum-of-science": [42.367074, -71.070081],
+  "imaxguide-us-branson-branson-s-imax-entertainment-complex": [
+    36.65379, -93.28714
+  ],
+  "imaxguide-us-burbank-amc-burbank-16-imax": [34.183897, -118.312305],
+  "imaxguide-us-chantilly-airbus-imax-steven-f-udvar-hazy-center": [
+    38.910855, -77.444301
+  ],
+  "imaxguide-us-chattanooga-imax-3d-tennessee-aquarium": [35.05586, -85.311],
+  "imaxguide-us-cherry-hill-amc-cherry-hill-24-imax": [39.9363, -75.0281],
+  "imaxguide-us-chicago-amc-roosevelt-collection-16-imax": [
+    41.867772, -87.632013
+  ],
+  "imaxguide-us-chicago-regal-city-north-imax": [41.930175, -87.688099],
+  "imaxguide-us-columbia-amc-columbia-14-imax": [39.217388, -76.863434],
+  "imaxguide-us-columbus-lennox-town-center-imax": [39.995961, -83.027867],
+  "imaxguide-us-dallas-cinemark-dallas-imax": [32.91033, -96.87448],
+  "imaxguide-us-daly-city-cinemark-century-daly-city-20-imax": [
+    37.702297, -122.470258
+  ],
+  "imaxguide-us-deer-park-regal-deer-park-imax": [40.765321, -73.306216],
+  "imaxguide-us-delray-beach-evo-entertainment-delray-beach-imax": [
+    26.456959, -80.188969
+  ],
+  "imaxguide-us-detroit-chrysler-imax-dome-theatre-michigan-science-center": [
+    42.358687, -83.062149
+  ],
+  "imaxguide-us-dublin-regal-hacienda-crossings-imax": [37.703013, -121.88564],
+  "imaxguide-us-edinburg-amc-edinburg-18-imax": [26.272977, -98.156171],
+  "imaxguide-us-fayetteville-amc-fayetteville-14-imax": [35.069366, -78.969958],
+  "imaxguide-us-fort-lauderdale-autonation-imax-museum-of-discovery-science": [
+    26.120823, -80.148201
+  ],
+  "imaxguide-us-frederick-regal-westview-imax": [39.3741, -77.413],
+  "imaxguide-us-fresh-meadows-amc-fresh-meadows-7-imax": [40.7411, -73.7839],
+  "imaxguide-us-garland-amc-firewheel-18-imax": [32.950411, -96.613905],
+  "imaxguide-us-grand-blanc-ncg-trillium-imax": [42.911465, -83.626724],
+  "imaxguide-us-grand-canyon-grand-canyon-imax-grand-canyon-visitor-center": [
+    35.974318, -112.126869
+  ],
+  "imaxguide-us-grand-rapids-celebration-cinema-grand-rapids-north-imax": [
+    43.001036, -85.593268
+  ],
+  "imaxguide-us-greenville-greenville-grande-imax": [35.5731, -77.4044],
+  "imaxguide-us-henderson-regal-sunset-station-imax": [36.061226, -115.04178],
+  "imaxguide-us-high-point-regal-palladium-imax": [36.034977, -79.958937],
+  "imaxguide-us-highlands-ranch-amc-highlands-ranch-24-imax": [
+    39.559879, -104.991876
+  ],
+  "imaxguide-us-hollywood-tcl-chinese-theatres-imax": [34.101835, -118.340952],
+  "imaxguide-us-homestead-evo-entertainment-homestead-imax": [
+    25.469638, -80.477647
+  ],
+  "imaxguide-us-houston-regal-edwards-houston-marq-e-imax": [
+    29.78594, -95.46359
+  ],
+  "imaxguide-us-independence-amc-independence-20-imax": [39.050276, -94.353114],
+  "imaxguide-us-indianapolis-imax-indiana-state-museum": [
+    39.769062, -86.169499
+  ],
+  "imaxguide-us-inglewood-cinepolis-luxury-cinemas-inglewood-imax": [
+    33.946, -118.3432
+  ],
+  "imaxguide-us-king-of-prussia-regal-ua-king-of-prussia-imax": [
+    40.092908, -75.397778
+  ],
+  "imaxguide-us-knoxville-regal-pinnacle-imax": [35.89967, -84.15577],
+  "imaxguide-us-las-vegas-regal-red-rock-imax": [36.154718, -115.335014],
+  "imaxguide-us-los-angeles-imax-california-science-center": [
+    34.0153, -118.2859
+  ],
+  "imaxguide-us-loveland-metrolux-12-imax": [40.420273, -104.990727],
+  "imaxguide-us-mclean-amc-tysons-corner-16-imax": [38.9162, -77.22357],
+  "imaxguide-us-merced-regal-hollywood-merced-imax": [37.301589, -120.481907],
+  "imaxguide-us-methuen-amc-methuen-20-imax": [42.744467, -71.157271],
+  "imaxguide-us-miami-regal-kendall-village-imax": [25.68849, -80.39323],
+  "imaxguide-us-moore-regal-warren-moore-imax": [35.329067, -97.493264],
+  "imaxguide-us-naples-regal-naples-imax": [26.21711, -81.771825],
+  "imaxguide-us-new-brunswick-amc-new-brunswick-18-imax": [
+    40.423233, -74.383005
+  ],
+  "imaxguide-us-new-rochelle-regal-new-roc-imax": [40.91138, -73.77986],
+  "imaxguide-us-north-las-vegas-regal-aliante-imax": [36.292843, -115.17884],
+  "imaxguide-us-ontario-regal-edwards-ontario-palace-imax": [
+    34.075692, -117.5488
+  ],
+  "imaxguide-us-palm-beach-gardens-cmx-downtown-at-the-gardens-16-imax": [
+    26.849887, -80.094542
+  ],
+  "imaxguide-us-pooler-royal-cinemas-imax": [32.146874, -81.252483],
+  "imaxguide-us-port-chester-amc-port-chester-14-imax": [40.999831, -73.663193],
+  "imaxguide-us-providence-providence-place-cinemas-16-and-imax": [
+    41.82681, -71.417097
+  ],
+  "imaxguide-us-rochester-cinemark-tinseltown-rochester-and-imax": [
+    43.142881, -77.713672
+  ],
+  "imaxguide-us-sacramento-esquire-imax-theatre": [38.57854, -121.49041],
+  "imaxguide-us-san-diego-regal-edwards-mira-mesa-imax": [
+    32.915254, -117.117585
+  ],
+  "imaxguide-us-sandy-megaplex-sandy-at-jordan-commons-imax": [
+    40.581894, -111.889909
+  ],
+  "imaxguide-us-santa-clarita-regal-edwards-valencia-imax": [
+    34.418598, -118.561691
+  ],
+  "imaxguide-us-seattle-imax-at-the-center-formerly-the-boeing-imax-theater": [
+    47.6197, -122.3521
+  ],
+  "imaxguide-us-seattle-paccar-imax-theater-at-pacific-science-center": [
+    47.6197, -122.3521
+  ],
+  "imaxguide-us-seattle-regal-thornton-place-imax": [47.702855, -122.325353],
+  "imaxguide-us-simpsonville-regal-simpsonville-imax": [34.727089, -82.258548],
+  "imaxguide-us-south-gate-regal-edwards-south-gate-imax": [
+    33.951855, -118.161633
+  ],
+  "imaxguide-us-southgate-mjr-southgate-imax": [42.195659, -83.190265],
+  "imaxguide-us-stockton-regal-stockton-city-centre-imax": [
+    37.95522, -121.28978
+  ],
+  "imaxguide-us-stony-brook-amc-stony-brook-17-imax": [40.875399, -73.126689],
+  "imaxguide-us-tempe-harkins-arizona-mills-25-imax": [33.385342, -111.966072],
+  "imaxguide-us-warrington-regal-warrington-crossing-imax": [40.2164, -75.143],
+  "imaxguide-us-waukee-the-palms-theatre-imax": [41.61742, -93.86429],
+  "imaxguide-us-waxahachie-evo-entertainment-waxahachie-imax": [
+    32.400329, -96.816486
+  ],
+  "imaxguide-us-yorba-linda-regal-yorba-linda-imax": [33.89054, -117.81173]
+}

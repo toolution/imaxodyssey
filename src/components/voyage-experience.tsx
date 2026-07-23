@@ -81,6 +81,7 @@ export interface VoyageCopy {
   noResultsBody: string;
   disclaimer: string;
   dataNote: string;
+  dataCredit: string;
 }
 
 export interface VoyageSeoCopy {
@@ -282,7 +283,7 @@ export function VoyageExperience({
                       field={field}
                       label={copy.departureLabel}
                       placeholder={copy.departurePlaceholder}
-                      autoComplete="postal-code"
+                      autoComplete="address-level2"
                       disabled={mutation.isPending}
                     />
                   </div>
@@ -387,7 +388,18 @@ export function VoyageExperience({
             </p>
             <h2>{copy.methodTitle}</h2>
           </div>
-          <p>{copy.dataNote}</p>
+          <div>
+            <p>{copy.dataNote}</p>
+            <p>
+              <a
+                href="https://github.com/r-imax/imaxguide"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {copy.dataCredit}
+              </a>
+            </p>
+          </div>
         </section>
 
         <SeoGuide copy={seo} />
@@ -755,7 +767,7 @@ function TheaterIsland({
   copy,
 }: {
   route: VoyageRoute;
-  country: 'US' | 'CA';
+  country: string;
   copy: VoyageCopy;
 }) {
   const theater = route.theater;
@@ -767,7 +779,8 @@ function TheaterIsland({
         </div>
         <div>
           <p>
-            {theater.city}, {theater.region}
+            {[theater.city, theater.region].filter(Boolean).join(', ')} ·{' '}
+            {theater.countryName ?? theater.country}
           </p>
           <h2>{theater.name}</h2>
           <div className="theater-journey">
@@ -816,7 +829,16 @@ function TheaterIsland({
       </dl>
       <div className="theater-actions">
         <a
-          href={`https://www.google.com/maps/dir/?api=1&destination=${theater.latitude},${theater.longitude}`}
+          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+            [
+              theater.name,
+              theater.city,
+              theater.region,
+              theater.countryName ?? theater.country,
+            ]
+              .filter(Boolean)
+              .join(', ')
+          )}`}
           target="_blank"
           rel="noreferrer"
         >
@@ -838,10 +860,15 @@ function screeningLabel(theater: TheaterCapability, copy: VoyageCopy) {
   return copy.screeningUnknown;
 }
 
-function formatDistance(meters: number, country: 'US' | 'CA') {
-  if (country === 'CA')
-    return `${Math.round(meters / 1000).toLocaleString()} km`;
-  return `${Math.round(meters / 1609.344).toLocaleString()} mi`;
+function formatDistance(meters: number, country: string) {
+  if (['US', 'GB', 'LR', 'MM'].includes(country)) {
+    const miles = meters / 1609.344;
+    return miles < 1 ? '<1 mi' : `${Math.round(miles).toLocaleString()} mi`;
+  }
+  const kilometers = meters / 1000;
+  return kilometers < 1
+    ? '<1 km'
+    : `${Math.round(kilometers).toLocaleString()} km`;
 }
 
 function formatDuration(seconds: number) {

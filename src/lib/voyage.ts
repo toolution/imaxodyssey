@@ -18,9 +18,11 @@ export interface TheaterCapability {
   name: string;
   city: string;
   region: string;
-  country: 'US' | 'CA';
+  country: string;
+  countryName?: string;
   latitude: number;
   longitude: number;
+  coordinatePrecision?: 'venue' | 'city';
   formats: string[];
   projector: string;
   aspectRatio: string;
@@ -28,6 +30,7 @@ export interface TheaterCapability {
   hasGtLaser: boolean;
   worthVoyage: boolean;
   screeningStatus: ScreeningStatus;
+  commercialFilms?: 'yes' | 'limited' | 'no' | 'unknown';
   verifiedAt: string;
   sourceUrl: string;
   confidence: 'high' | 'medium';
@@ -54,7 +57,7 @@ export interface VoyageSearchResult {
   departure: {
     city: string;
     region: string;
-    country: 'US' | 'CA';
+    country: string;
     latitude: number;
     longitude: number;
   };
