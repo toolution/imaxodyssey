@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Share2, Sparkles, X } from 'lucide-react';
+import { Check, MapPin, Share2, Sparkles, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -10,10 +10,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-export type VoyagePromptKind = 'gratitude';
+export type VoyagePromptKind = 'theaters' | 'gratitude';
 
 export interface VoyagePromptCopy {
   close: string;
+  theaters: {
+    eyebrow: string;
+    title: string;
+    confirm: string;
+  };
   gratitude: {
     eyebrow: string;
     title: string;
@@ -26,11 +31,13 @@ export interface VoyagePromptCopy {
 export function VoyagePrompts({
   prompt,
   copy,
+  theaterDescription,
   onClose,
   onShare,
 }: {
   prompt: VoyagePromptKind | null;
   copy: VoyagePromptCopy;
+  theaterDescription: string;
   onClose: () => void;
   onShare: () => void;
 }) {
@@ -59,12 +66,41 @@ export function VoyagePrompts({
             <X aria-hidden="true" />
           </DialogClose>
 
+          {prompt === 'theaters' ? (
+            <TheaterPrompt copy={copy} description={theaterDescription} />
+          ) : null}
+
           {prompt === 'gratitude' ? (
             <GratitudePrompt copy={copy} onShare={onShare} />
           ) : null}
         </DialogContent>
       ) : null}
     </Dialog>
+  );
+}
+
+function TheaterPrompt({
+  copy,
+  description,
+}: {
+  copy: VoyagePromptCopy;
+  description: string;
+}) {
+  return (
+    <>
+      <PromptSeal>
+        <MapPin aria-hidden="true" />
+      </PromptSeal>
+      <p className="voyage-prompt-eyebrow">{copy.theaters.eyebrow}</p>
+      <DialogTitle>{copy.theaters.title}</DialogTitle>
+      <DialogDescription>{description}</DialogDescription>
+      <DialogClose
+        render={<Button className="voyage-prompt-primary" size="lg" />}
+      >
+        <Check aria-hidden="true" />
+        {copy.theaters.confirm}
+      </DialogClose>
+    </>
   );
 }
 

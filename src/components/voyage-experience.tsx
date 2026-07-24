@@ -82,6 +82,9 @@ export interface VoyageCopy {
   copyFailed: string;
   shareImageNote: string;
   popups: {
+    theaters: VoyagePromptCopy['theaters'] & {
+      description: (city: string, count: number) => string;
+    };
     gratitude: VoyagePromptCopy['gratitude'];
   };
   methodLink: string;
@@ -128,6 +131,7 @@ const missionOrder: VoyageMission[] = [
   'worth-voyage',
 ];
 
+const THEATER_PROMPT_STORAGE_KEY = 'imax-odyssey:theater-info-prompt-v2';
 const GRATITUDE_STORAGE_KEY = 'imax-odyssey:gratitude-prompt';
 const GRATITUDE_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
 const GRATITUDE_DWELL_MS = 30 * 1000;
@@ -156,6 +160,7 @@ export function VoyageExperience({
   const [activePrompt, setActivePrompt] = useState<VoyagePromptKind | null>(
     null
   );
+  const [theaterPromptPending, setTheaterPromptPending] = useState(false);
   const [resultsEngaged, setResultsEngaged] = useState(false);
   const [sharePreview, setSharePreview] = useState<{
     url: string;
@@ -168,12 +173,29 @@ export function VoyageExperience({
     onSuccess: (data) => {
       setResult(data);
       setShowVoyage(false);
+      if (
+        data.matches.length > 0 &&
+        readStorage('local', THEATER_PROMPT_STORAGE_KEY) !== '1'
+      ) {
+        setTheaterPromptPending(true);
+      }
     },
     onError: (error: Error) => {
       setShowVoyage(false);
       toast.error(error.message);
     },
   });
+
+  useEffect(() => {
+    if (!theaterPromptPending || activePrompt || sharePreview) return;
+
+    const timer = window.setTimeout(() => {
+      setTheaterPromptPending(false);
+      writeStorage('local', THEATER_PROMPT_STORAGE_KEY, '1');
+      setActivePrompt('theaters');
+    }, 550);
+    return () => window.clearTimeout(timer);
+  }, [activePrompt, sharePreview, theaterPromptPending]);
 
   useEffect(() => {
     setResultsEngaged(false);
@@ -201,6 +223,7 @@ export function VoyageExperience({
     if (
       !resultsEngaged ||
       activePrompt ||
+      theaterPromptPending ||
       sharePreview ||
       gratitudePromptWasShownRecently()
     ) {
@@ -222,7 +245,7 @@ export function VoyageExperience({
       window.clearTimeout(dwellTimer);
       if (retryTimer) window.clearTimeout(retryTimer);
     };
-  }, [activePrompt, resultsEngaged, sharePreview]);
+  }, [activePrompt, resultsEngaged, sharePreview, theaterPromptPending]);
 
   const form = useForm({
     defaultValues: { departure: '', mission: 'closest' as VoyageMission },
@@ -244,6 +267,12 @@ export function VoyageExperience({
   });
 
   const nearestMatch = result?.matches[0];
+  const theaterPromptDescription = result
+    ? copy.popups.theaters.description(
+        result.departure.city,
+        result.matches.length
+      )
+    : '';
 
   function useCurrentLocation() {
     if (isLocating || mutation.isPending) return;
@@ -488,8 +517,14 @@ export function VoyageExperience({
         prompt={activePrompt}
         copy={{
           close: copy.close,
+          theaters: {
+            eyebrow: copy.popups.theaters.eyebrow,
+            title: copy.popups.theaters.title,
+            confirm: copy.popups.theaters.confirm,
+          },
           gratitude: copy.popups.gratitude,
         }}
+        theaterDescription={theaterPromptDescription}
         onClose={() => setActivePrompt(null)}
         onShare={shareFromPrompt}
       />

@@ -67,6 +67,18 @@ export function Voyage() {
         copyFailed: m['voyage.share.copy_failed'](),
         shareImageNote: m['voyage.share.image_note'](),
         popups: {
+          theaters: {
+            eyebrow: m['voyage.popup.theaters.eyebrow'](),
+            title: m['voyage.popup.theaters.title'](),
+            description: (city, count) =>
+              m['voyage.popup.theaters.description']({
+                city,
+                count,
+                directions: m['voyage.details.directions'](),
+                source: m['voyage.details.source'](),
+              }),
+            confirm: m['voyage.popup.theaters.confirm'](),
+          },
           gratitude: {
             eyebrow: m['voyage.popup.gratitude.eyebrow'](),
             title: m['voyage.popup.gratitude.title'](),

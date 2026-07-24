@@ -814,6 +814,9 @@ body:has(.voyage-prompt) [data-slot='dialog-overlay'] {
 .voyage-prompt-gratitude[data-slot='dialog-content'] {
   width: min(470px, calc(100% - 32px));
 }
+.voyage-prompt-theaters[data-slot='dialog-content'] {
+  width: min(520px, calc(100% - 32px));
+}
 .voyage-prompt-close {
   position: absolute;
   z-index: 3;
@@ -858,7 +861,8 @@ body:has(.voyage-prompt) [data-slot='dialog-overlay'] {
   font-weight: 400;
   line-height: 1.05;
 }
-.voyage-prompt-gratitude [data-slot='dialog-title'] {
+.voyage-prompt-gratitude [data-slot='dialog-title'],
+.voyage-prompt-theaters [data-slot='dialog-title'] {
   font-size: 31px;
 }
 .voyage-prompt [data-slot='dialog-description'] {
