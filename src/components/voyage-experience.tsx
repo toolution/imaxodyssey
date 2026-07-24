@@ -1,19 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import {
   Anchor,
+  AtSign,
   Check,
+  Copy,
   Download,
   ExternalLink,
+  Globe2,
   Info,
   LoaderCircle,
   LocateFixed,
+  MessageCircle,
   Navigation,
   Route as RouteIcon,
+  Send,
   Share2,
   SkipForward,
   Sparkles,
+  Users,
   Waves,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,6 +35,11 @@ import {
 } from '@/lib/voyage';
 import { TextField } from '@/components/form-field';
 import { Button } from '@/components/ui/button';
+import {
+  VoyagePrompts,
+  type VoyagePromptCopy,
+  type VoyagePromptKind,
+} from '@/components/voyage-prompts';
 
 export interface VoyageCopy {
   brand: string;
@@ -65,6 +76,18 @@ export interface VoyageCopy {
   download: string;
   systemShare: string;
   close: string;
+  sharePlatforms: string;
+  copyLink: string;
+  linkCopied: string;
+  copyFailed: string;
+  shareImageNote: string;
+  popups: {
+    welcome: VoyagePromptCopy['welcome'];
+    theaters: VoyagePromptCopy['theaters'] & {
+      description: (city: string, theater: string, count: number) => string;
+    };
+    gratitude: VoyagePromptCopy['gratitude'];
+  };
   methodLink: string;
   resultTitle: string;
   resultSummary: (city: string, count: number) => string;
@@ -109,6 +132,22 @@ const missionOrder: VoyageMission[] = [
   'worth-voyage',
 ];
 
+const WELCOME_STORAGE_KEY = 'imax-odyssey:welcome-date';
+const THEATER_PROMPT_SESSION_KEY = 'imax-odyssey:theater-prompt';
+const GRATITUDE_STORAGE_KEY = 'imax-odyssey:gratitude-prompt';
+const GRATITUDE_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
+const GRATITUDE_DWELL_MS = 30 * 1000;
+const socialPlatforms = [
+  { id: 'x', label: 'X', icon: AtSign },
+  { id: 'facebook', label: 'Facebook', icon: Users },
+  { id: 'reddit', label: 'Reddit', icon: MessageCircle },
+  { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
+  { id: 'telegram', label: 'Telegram', icon: Send },
+  { id: 'bluesky', label: 'Bluesky', icon: Globe2 },
+] as const;
+
+type SocialPlatformId = (typeof socialPlatforms)[number]['id'];
+
 export function VoyageExperience({
   copy,
   seo,
@@ -116,13 +155,30 @@ export function VoyageExperience({
   copy: VoyageCopy;
   seo: VoyageSeoCopy;
 }) {
+  const resultsRef = useRef<HTMLElement>(null);
   const [result, setResult] = useState<VoyageSearchResult | null>(null);
   const [showVoyage, setShowVoyage] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [activePrompt, setActivePrompt] = useState<VoyagePromptKind | null>(
+    null
+  );
+  const [blessingIndex, setBlessingIndex] = useState(0);
+  const [theaterPromptPending, setTheaterPromptPending] = useState(false);
+  const [resultsEngaged, setResultsEngaged] = useState(false);
   const [sharePreview, setSharePreview] = useState<{
     url: string;
     blob: Blob;
   } | null>(null);
+
+  useEffect(() => {
+    const today = localDateStamp();
+    if (readStorage('local', WELCOME_STORAGE_KEY) === today) return;
+
+    writeStorage('local', WELCOME_STORAGE_KEY, today);
+    setBlessingIndex(randomIndex(copy.popups.welcome.blessings.length));
+    const timer = window.setTimeout(() => setActivePrompt('welcome'), 450);
+    return () => window.clearTimeout(timer);
+  }, [copy.popups.welcome.blessings.length]);
 
   const mutation = useMutation({
     mutationFn: (request: VoyageSearchRequest) =>
@@ -130,12 +186,79 @@ export function VoyageExperience({
     onSuccess: (data) => {
       setResult(data);
       setShowVoyage(false);
+      if (
+        data.matches.length > 0 &&
+        readStorage('session', THEATER_PROMPT_SESSION_KEY) !== '1'
+      ) {
+        writeStorage('session', THEATER_PROMPT_SESSION_KEY, '1');
+        setTheaterPromptPending(true);
+      }
     },
     onError: (error: Error) => {
       setShowVoyage(false);
       toast.error(error.message);
     },
   });
+
+  useEffect(() => {
+    if (!theaterPromptPending || activePrompt || sharePreview) return;
+
+    const timer = window.setTimeout(() => {
+      setTheaterPromptPending(false);
+      setActivePrompt('theaters');
+    }, 550);
+    return () => window.clearTimeout(timer);
+  }, [activePrompt, sharePreview, theaterPromptPending]);
+
+  useEffect(() => {
+    setResultsEngaged(false);
+    const element = resultsRef.current;
+    if (!result?.matches.length || !element) return;
+
+    if (!('IntersectionObserver' in window)) {
+      setResultsEngaged(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting || entry.intersectionRatio < 0.35) return;
+        setResultsEngaged(true);
+        observer.disconnect();
+      },
+      { threshold: [0.35] }
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [result]);
+
+  useEffect(() => {
+    if (
+      !resultsEngaged ||
+      activePrompt ||
+      theaterPromptPending ||
+      sharePreview ||
+      gratitudePromptWasShownRecently()
+    ) {
+      return;
+    }
+
+    let retryTimer: number | undefined;
+    const showPrompt = () => {
+      if (document.visibilityState !== 'visible') {
+        retryTimer = window.setTimeout(showPrompt, 5_000);
+        return;
+      }
+      markGratitudePromptSeen();
+      setActivePrompt('gratitude');
+    };
+    const dwellTimer = window.setTimeout(showPrompt, GRATITUDE_DWELL_MS);
+
+    return () => {
+      window.clearTimeout(dwellTimer);
+      if (retryTimer) window.clearTimeout(retryTimer);
+    };
+  }, [activePrompt, resultsEngaged, sharePreview, theaterPromptPending]);
 
   const form = useForm({
     defaultValues: { departure: '', mission: 'closest' as VoyageMission },
@@ -157,6 +280,14 @@ export function VoyageExperience({
   });
 
   const nearestMatch = result?.matches[0];
+  const theaterPromptDescription =
+    result && nearestMatch
+      ? copy.popups.theaters.description(
+          result.departure.city,
+          nearestMatch.theater.name,
+          result.matches.length
+        )
+      : '';
 
   function useCurrentLocation() {
     if (!navigator.geolocation) {
@@ -192,8 +323,41 @@ export function VoyageExperience({
 
   async function openShareCard() {
     if (!result || !nearestMatch) return;
-    const card = await createShareCard(result, nearestMatch, copy);
+    markGratitudePromptSeen();
+    const card = await createShareCard(
+      result,
+      nearestMatch,
+      copy,
+      seo.canonicalUrl
+    );
     setSharePreview(card);
+  }
+
+  function openNearestTheaterInMaps() {
+    if (!nearestMatch) return;
+    setActivePrompt(null);
+    window.open(
+      theaterDirectionsUrl(nearestMatch.theater),
+      '_blank',
+      'noopener,noreferrer'
+    );
+  }
+
+  function viewTheaters() {
+    setActivePrompt(null);
+    window.setTimeout(() => {
+      resultsRef.current?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'auto'
+          : 'smooth',
+        block: 'start',
+      });
+    }, 80);
+  }
+
+  function shareFromPrompt() {
+    setActivePrompt(null);
+    void openShareCard();
   }
 
   return (
@@ -310,7 +474,11 @@ export function VoyageExperience({
         ) : null}
 
         {result && nearestMatch ? (
-          <section className="voyage-results" aria-labelledby="result-heading">
+          <section
+            ref={resultsRef}
+            className="voyage-results"
+            aria-labelledby="result-heading"
+          >
             <div className="voyage-result-heading">
               <div>
                 <p className="voyage-eyebrow">
@@ -372,12 +540,34 @@ export function VoyageExperience({
         <p>{copy.disclaimer}</p>
       </footer>
 
+      <VoyagePrompts
+        prompt={activePrompt}
+        copy={{
+          close: copy.close,
+          welcome: copy.popups.welcome,
+          theaters: {
+            eyebrow: copy.popups.theaters.eyebrow,
+            title: copy.popups.theaters.title,
+            maps: copy.popups.theaters.maps,
+            view: copy.popups.theaters.view,
+          },
+          gratitude: copy.popups.gratitude,
+        }}
+        blessingIndex={blessingIndex}
+        theaterDescription={theaterPromptDescription}
+        onClose={() => setActivePrompt(null)}
+        onOpenMaps={openNearestTheaterInMaps}
+        onViewTheaters={viewTheaters}
+        onShare={shareFromPrompt}
+      />
+
       {sharePreview && result && nearestMatch ? (
         <ShareDialog
           preview={sharePreview}
           result={result}
           match={nearestMatch}
           copy={copy}
+          shareUrl={seo.canonicalUrl}
           onClose={() => {
             URL.revokeObjectURL(sharePreview.url);
             setSharePreview(null);
@@ -591,16 +781,7 @@ function TheaterIsland({
       </dl>
       <div className="theater-actions">
         <a
-          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-            [
-              theater.name,
-              theater.city,
-              theater.region,
-              theater.countryName ?? theater.country,
-            ]
-              .filter(Boolean)
-              .join(', ')
-          )}`}
+          href={theaterDirectionsUrl(theater)}
           target="_blank"
           rel="noreferrer"
         >
@@ -633,10 +814,68 @@ function formatDistance(meters: number, country: string) {
     : `${Math.round(kilometers).toLocaleString()} km`;
 }
 
+function theaterDirectionsUrl(theater: TheaterCapability) {
+  const destination = [
+    theater.name,
+    theater.city,
+    theater.region,
+    theater.countryName ?? theater.country,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
+}
+
+function localDateStamp() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+function randomIndex(length: number) {
+  if (length <= 1) return 0;
+  const values = new Uint32Array(1);
+  window.crypto.getRandomValues(values);
+  return values[0] % length;
+}
+
+function readStorage(kind: 'local' | 'session', key: string) {
+  try {
+    const storage =
+      kind === 'local' ? window.localStorage : window.sessionStorage;
+    return storage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(kind: 'local' | 'session', key: string, value: string) {
+  try {
+    const storage =
+      kind === 'local' ? window.localStorage : window.sessionStorage;
+    storage.setItem(key, value);
+  } catch {
+    // Private browsing modes can disable storage; the popup still works.
+  }
+}
+
+function gratitudePromptWasShownRecently() {
+  const shownAt = Number(readStorage('local', GRATITUDE_STORAGE_KEY));
+  return (
+    Number.isFinite(shownAt) && Date.now() - shownAt < GRATITUDE_COOLDOWN_MS
+  );
+}
+
+function markGratitudePromptSeen() {
+  writeStorage('local', GRATITUDE_STORAGE_KEY, String(Date.now()));
+}
+
 async function createShareCard(
   result: VoyageSearchResult,
   match: VoyageTheaterMatch,
-  copy: VoyageCopy
+  copy: VoyageCopy,
+  shareUrl: string
 ) {
   const canvas = document.createElement('canvas');
   canvas.width = 1080;
@@ -691,6 +930,15 @@ async function createShareCard(
   ctx.font = '700 50px Georgia';
   ctx.fillStyle = '#e8d9b5';
   ctx.fillText(copy.shareQuestion, 100, 1725);
+  ctx.strokeStyle = 'rgba(215,181,109,.45)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(100, 1770);
+  ctx.lineTo(980, 1770);
+  ctx.stroke();
+  ctx.font = '600 26px Arial';
+  ctx.fillStyle = '#6fb7b0';
+  ctx.fillText(displayShareUrl(shareUrl), 100, 1820, 860);
   const blob = await new Promise<Blob>((resolve, reject) =>
     canvas.toBlob(
       (value) =>
@@ -724,37 +972,147 @@ function wrapCanvasText(
   ctx.fillText(line.trim(), x, y);
 }
 
+function displayShareUrl(shareUrl: string) {
+  try {
+    const url = new URL(shareUrl);
+    const path = url.pathname === '/' ? '' : url.pathname.replace(/\/$/, '');
+    return `${url.host}${path}`;
+  } catch {
+    return shareUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  }
+}
+
+function socialShareUrl(
+  platform: SocialPlatformId,
+  shareUrl: string,
+  text: string
+) {
+  const textWithUrl = `${text}\n${shareUrl}`;
+  const destinations: Record<SocialPlatformId, [string, URLSearchParams]> = {
+    x: [
+      'https://twitter.com/intent/tweet',
+      new URLSearchParams({ text, url: shareUrl }),
+    ],
+    facebook: [
+      'https://www.facebook.com/sharer/sharer.php',
+      new URLSearchParams({ u: shareUrl }),
+    ],
+    reddit: [
+      'https://www.reddit.com/submit',
+      new URLSearchParams({ title: text, url: shareUrl }),
+    ],
+    whatsapp: ['https://wa.me/', new URLSearchParams({ text: textWithUrl })],
+    telegram: [
+      'https://t.me/share/url',
+      new URLSearchParams({ text, url: shareUrl }),
+    ],
+    bluesky: [
+      'https://bsky.app/intent/compose',
+      new URLSearchParams({ text: textWithUrl }),
+    ],
+  };
+  const [baseUrl, params] = destinations[platform];
+  return `${baseUrl}?${params.toString()}`;
+}
+
+async function copyText(text: string) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  const copied = document.execCommand('copy');
+  textarea.remove();
+  if (!copied) throw new Error('Clipboard unavailable');
+}
+
 function ShareDialog({
   preview,
   result,
   match,
   copy,
+  shareUrl,
   onClose,
 }: {
   preview: { url: string; blob: Blob };
   result: VoyageSearchResult;
   match: VoyageTheaterMatch;
   copy: VoyageCopy;
+  shareUrl: string;
   onClose: () => void;
 }) {
   async function share() {
     const file = new File([preview.blob], 'imax-odyssey.png', {
       type: 'image/png',
     });
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    if (!navigator.share || !navigator.canShare?.({ files: [file] })) {
+      download();
+      return;
+    }
+
+    const text = `${copy.shareQuestion}\n${shareUrl}`;
+    try {
       await navigator.share({
         files: [file],
         title: copy.brand,
-        text: copy.shareQuestion,
+        text,
+        url: shareUrl,
       });
-    } else download();
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (error instanceof TypeError) {
+        try {
+          await navigator.share({ files: [file], title: copy.brand, text });
+        } catch (fallbackError) {
+          if (
+            fallbackError instanceof DOMException &&
+            fallbackError.name === 'AbortError'
+          ) {
+            return;
+          }
+          toast.error(
+            fallbackError instanceof Error
+              ? fallbackError.message
+              : String(fallbackError)
+          );
+        }
+        return;
+      }
+      toast.error(error instanceof Error ? error.message : String(error));
+    }
   }
+
   function download() {
     const anchor = document.createElement('a');
     anchor.href = preview.url;
     anchor.download = `imax-odyssey-${result.departure.city.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
     anchor.click();
   }
+
+  async function copyWebsiteLink() {
+    try {
+      await copyText(shareUrl);
+      toast.success(copy.linkCopied);
+    } catch (error) {
+      toast.error(copy.copyFailed);
+    }
+  }
+
+  function shareToPlatform(platform: SocialPlatformId) {
+    window.open(
+      socialShareUrl(platform, shareUrl, copy.shareQuestion),
+      '_blank',
+      'noopener,noreferrer,width=720,height=720'
+    );
+  }
+
   return (
     <div
       className="share-dialog"
@@ -770,14 +1128,44 @@ function ShareDialog({
       />
       <div className="share-dialog-panel">
         <img src={preview.url} alt={`${match.theater.name} share card`} />
-        <div>
-          <Button onClick={share}>
-            <Share2 aria-hidden="true" /> {copy.systemShare}
+        <div className="share-dialog-actions">
+          <div className="share-dialog-file-actions">
+            <Button onClick={share}>
+              <Share2 aria-hidden="true" /> {copy.systemShare}
+            </Button>
+            <Button variant="outline" onClick={download}>
+              <Download aria-hidden="true" /> {copy.download}
+            </Button>
+          </div>
+
+          <div className="share-dialog-platforms">
+            <p>{copy.sharePlatforms}</p>
+            <div className="share-dialog-platform-grid">
+              {socialPlatforms.map(({ id, label, icon: Icon }) => (
+                <Button
+                  key={id}
+                  variant="outline"
+                  onClick={() => shareToPlatform(id)}
+                >
+                  <Icon aria-hidden="true" /> {label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <Button
+            className="share-dialog-copy-link"
+            variant="outline"
+            onClick={copyWebsiteLink}
+          >
+            <Copy aria-hidden="true" /> {copy.copyLink}
           </Button>
-          <Button variant="outline" onClick={download}>
-            <Download aria-hidden="true" /> {copy.download}
-          </Button>
-          <button type="button" onClick={onClose}>
+          <p className="share-dialog-note">{copy.shareImageNote}</p>
+          <button
+            className="share-dialog-close"
+            type="button"
+            onClick={onClose}
+          >
             {copy.close}
           </button>
         </div>

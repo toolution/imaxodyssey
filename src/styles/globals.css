@@ -788,6 +788,184 @@
   margin-top: 10px;
   color: rgb(232 217 181 / 58%);
 }
+body:has(.voyage-prompt) [data-slot='dialog-overlay'] {
+  background: rgb(1 8 12 / 82%);
+  backdrop-filter: blur(6px);
+}
+.voyage-prompt[data-slot='dialog-content'] {
+  --voyage-sea: #071a26;
+  --voyage-night: #041019;
+  --voyage-gold: #d7b56d;
+  --voyage-glass: #6fb7b0;
+  --voyage-parchment: #e8d9b5;
+  width: min(680px, calc(100% - 32px));
+  max-width: none;
+  max-height: calc(100vh - 32px);
+  gap: 0;
+  overflow-y: auto;
+  border: 1px solid rgb(215 181 109 / 54%);
+  border-radius: 6px;
+  background-color: var(--voyage-sea);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='56' viewBox='0 0 180 56'%3E%3Cpath d='M0 28Q22 8 45 28T90 28T135 28T180 28' fill='none' stroke='%236fb7b0' stroke-opacity='.08'/%3E%3C/svg%3E");
+  padding: 34px;
+  color: var(--voyage-parchment);
+  box-shadow: 0 28px 90px rgb(0 0 0 / 62%);
+}
+.voyage-prompt-theaters[data-slot='dialog-content'] {
+  width: min(540px, calc(100% - 32px));
+}
+.voyage-prompt-gratitude[data-slot='dialog-content'] {
+  width: min(470px, calc(100% - 32px));
+}
+.voyage-prompt-close {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  right: 14px;
+  border: 1px solid rgb(232 217 181 / 18%);
+  border-radius: 50%;
+  color: rgb(232 217 181 / 72%);
+}
+.voyage-prompt-close:hover {
+  border-color: rgb(215 181 109 / 60%);
+  background: rgb(215 181 109 / 10%);
+  color: white;
+}
+.voyage-prompt-seal {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border: 1px solid var(--voyage-gold);
+  border-radius: 50%;
+  color: var(--voyage-gold);
+  box-shadow: inset 0 0 0 5px rgb(215 181 109 / 7%);
+}
+.voyage-prompt-seal svg {
+  width: 23px;
+  height: 23px;
+}
+.voyage-prompt-eyebrow {
+  margin-top: 22px;
+  color: var(--voyage-glass);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.voyage-prompt [data-slot='dialog-title'] {
+  margin-top: 9px;
+  color: var(--voyage-parchment);
+  font-family: var(--font-serif-display);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.05;
+}
+.voyage-prompt-gratitude [data-slot='dialog-title'] {
+  font-size: 31px;
+}
+.voyage-prompt [data-slot='dialog-description'] {
+  margin-top: 14px;
+  color: rgb(232 217 181 / 68%);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.voyage-prompt-steps {
+  margin-top: 24px;
+  padding: 0;
+  border-top: 1px solid rgb(215 181 109 / 22%);
+  list-style: none;
+}
+.voyage-prompt-steps li {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 14px;
+  align-items: start;
+  border-bottom: 1px solid rgb(215 181 109 / 16%);
+  padding: 16px 0;
+}
+.voyage-prompt-step-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgb(111 183 176 / 34%);
+  border-radius: 50%;
+  color: var(--voyage-glass);
+}
+.voyage-prompt-step-icon svg {
+  width: 15px;
+  height: 15px;
+}
+.voyage-prompt-steps strong {
+  color: var(--voyage-parchment);
+  font-size: 13px;
+}
+.voyage-prompt-steps p {
+  margin-top: 4px;
+  color: rgb(232 217 181 / 58%);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.voyage-blessing {
+  margin-top: 22px;
+  border-left: 2px solid var(--voyage-gold);
+  background: rgb(4 16 25 / 72%);
+  padding: 16px 18px;
+}
+.voyage-blessing span {
+  color: var(--voyage-gold);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.voyage-blessing p {
+  margin-top: 8px;
+  color: var(--voyage-parchment);
+  font-family: var(--font-serif-display);
+  font-size: 17px;
+  line-height: 1.55;
+}
+.voyage-prompt-primary,
+.voyage-prompt-secondary {
+  min-height: 46px;
+  border-radius: 4px;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.voyage-prompt-primary {
+  width: 100%;
+  margin-top: 22px;
+  border-color: var(--voyage-gold);
+  background: var(--voyage-gold);
+  color: var(--voyage-night);
+}
+.voyage-prompt-primary:hover {
+  background: var(--voyage-parchment);
+  color: var(--voyage-night);
+}
+.voyage-prompt-secondary {
+  border-color: rgb(111 183 176 / 52%);
+  background: rgb(4 16 25 / 58%);
+  color: var(--voyage-glass);
+}
+.voyage-prompt-secondary:hover {
+  border-color: var(--voyage-glass);
+  background: rgb(111 183 176 / 10%);
+  color: white;
+}
+.voyage-prompt-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 26px;
+}
+.voyage-prompt-actions .voyage-prompt-primary {
+  margin-top: 0;
+}
 .share-dialog {
   position: fixed;
   z-index: 100;
@@ -804,10 +982,12 @@
 .share-dialog-panel {
   position: relative;
   display: grid;
-  width: min(760px, 100%);
-  grid-template-columns: minmax(0, 360px) 1fr;
-  gap: 24px;
-  align-items: center;
+  width: min(900px, 100%);
+  max-height: calc(100vh - 40px);
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  overflow: auto;
   border: 1px solid rgb(215 181 109 / 45%);
   border-radius: 4px;
   background: var(--voyage-sea);
@@ -818,15 +998,73 @@
   max-height: 72vh;
   object-fit: contain;
 }
-.share-dialog-panel > div {
+.share-dialog-actions {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 .share-dialog-panel button {
   min-height: 42px;
   border-radius: 4px;
 }
-.share-dialog-panel > div > button:last-child {
+.share-dialog-file-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.share-dialog-file-actions button:first-child {
+  border-color: var(--voyage-gold);
+  background: var(--voyage-gold);
+  color: var(--voyage-night);
+}
+.share-dialog-file-actions button:first-child:hover {
+  background: var(--voyage-parchment);
+  color: var(--voyage-night);
+}
+.share-dialog-file-actions button:last-child,
+.share-dialog-platform-grid button,
+.share-dialog-copy-link {
+  border-color: rgb(111 183 176 / 42%);
+  background: rgb(4 16 25 / 48%);
+  color: var(--voyage-glass);
+}
+.share-dialog-file-actions button:last-child:hover,
+.share-dialog-platform-grid button:hover,
+.share-dialog-copy-link:hover {
+  border-color: var(--voyage-glass);
+  background: rgb(111 183 176 / 10%);
+  color: white;
+}
+.share-dialog-platforms {
+  border-top: 1px solid rgb(215 181 109 / 20%);
+  border-bottom: 1px solid rgb(215 181 109 / 16%);
+  padding: 16px 0;
+}
+.share-dialog-platforms > p {
+  color: var(--voyage-gold);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.share-dialog-platform-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.share-dialog-platform-grid button {
+  justify-content: flex-start;
+  padding-inline: 12px;
+}
+.share-dialog-copy-link {
+  width: 100%;
+}
+.share-dialog-note {
+  color: rgb(232 217 181 / 52%);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.share-dialog-close {
   color: rgb(232 217 181 / 58%);
   font-size: 12px;
 }
@@ -1076,7 +1314,44 @@
     overflow: auto;
   }
   .share-dialog-panel img {
-    max-height: 58vh;
+    max-height: 38vh;
+  }
+  .share-dialog-file-actions {
+    grid-template-columns: 1fr;
+  }
+  .voyage-prompt[data-slot='dialog-content'] {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: calc(100dvh - 16px);
+    transform: none;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 6px 6px 0 0;
+    padding: 26px 20px 22px;
+  }
+  .voyage-prompt [data-slot='dialog-title'],
+  .voyage-prompt-gratitude [data-slot='dialog-title'] {
+    padding-right: 32px;
+    font-size: 29px;
+  }
+  .voyage-prompt-steps {
+    margin-top: 18px;
+  }
+  .voyage-prompt-steps li {
+    padding: 13px 0;
+  }
+  .voyage-blessing {
+    margin-top: 18px;
+  }
+  .voyage-blessing p {
+    font-size: 15px;
+  }
+  .voyage-prompt-actions {
+    grid-template-columns: 1fr;
   }
   .voyage-not-found h1 {
     font-size: 42px;
