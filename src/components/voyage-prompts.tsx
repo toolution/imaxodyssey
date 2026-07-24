@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-export type VoyagePromptKind = 'welcome' | 'theaters' | 'gratitude';
+export type VoyagePromptKind = 'welcome' | 'gratitude';
 
 export interface VoyagePromptCopy {
   close: string;
@@ -31,12 +31,6 @@ export interface VoyagePromptCopy {
     blessingLabel: string;
     blessings: string[];
     cta: string;
-  };
-  theaters: {
-    eyebrow: string;
-    title: string;
-    maps: string;
-    view: string;
   };
   gratitude: {
     eyebrow: string;
@@ -53,19 +47,13 @@ export function VoyagePrompts({
   prompt,
   copy,
   blessingIndex,
-  theaterDescription,
   onClose,
-  onOpenMaps,
-  onViewTheaters,
   onShare,
 }: {
   prompt: VoyagePromptKind | null;
   copy: VoyagePromptCopy;
   blessingIndex: number;
-  theaterDescription: string;
   onClose: () => void;
-  onOpenMaps: () => void;
-  onViewTheaters: () => void;
   onShare: () => void;
 }) {
   return (
@@ -95,15 +83,6 @@ export function VoyagePrompts({
 
           {prompt === 'welcome' ? (
             <WelcomePrompt copy={copy} blessingIndex={blessingIndex} />
-          ) : null}
-
-          {prompt === 'theaters' ? (
-            <TheaterPrompt
-              copy={copy}
-              description={theaterDescription}
-              onOpenMaps={onOpenMaps}
-              onViewTheaters={onViewTheaters}
-            />
           ) : null}
 
           {prompt === 'gratitude' ? (
@@ -159,48 +138,6 @@ function WelcomePrompt({
         <Navigation aria-hidden="true" />
         {copy.welcome.cta}
       </DialogClose>
-    </>
-  );
-}
-
-function TheaterPrompt({
-  copy,
-  description,
-  onOpenMaps,
-  onViewTheaters,
-}: {
-  copy: VoyagePromptCopy;
-  description: string;
-  onOpenMaps: () => void;
-  onViewTheaters: () => void;
-}) {
-  return (
-    <>
-      <PromptSeal>
-        <Navigation aria-hidden="true" />
-      </PromptSeal>
-      <p className="voyage-prompt-eyebrow">{copy.theaters.eyebrow}</p>
-      <DialogTitle>{copy.theaters.title}</DialogTitle>
-      <DialogDescription>{description}</DialogDescription>
-      <div className="voyage-prompt-actions">
-        <Button
-          className="voyage-prompt-primary"
-          size="lg"
-          onClick={onOpenMaps}
-        >
-          <Navigation aria-hidden="true" />
-          {copy.theaters.maps}
-        </Button>
-        <Button
-          className="voyage-prompt-secondary"
-          variant="outline"
-          size="lg"
-          onClick={onViewTheaters}
-        >
-          <RouteIcon aria-hidden="true" />
-          {copy.theaters.view}
-        </Button>
-      </div>
     </>
   );
 }

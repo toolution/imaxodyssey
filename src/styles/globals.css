@@ -811,9 +811,6 @@ body:has(.voyage-prompt) [data-slot='dialog-overlay'] {
   color: var(--voyage-parchment);
   box-shadow: 0 28px 90px rgb(0 0 0 / 62%);
 }
-.voyage-prompt-theaters[data-slot='dialog-content'] {
-  width: min(540px, calc(100% - 32px));
-}
 .voyage-prompt-gratitude[data-slot='dialog-content'] {
   width: min(470px, calc(100% - 32px));
 }

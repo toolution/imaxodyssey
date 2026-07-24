@@ -83,9 +83,6 @@ export interface VoyageCopy {
   shareImageNote: string;
   popups: {
     welcome: VoyagePromptCopy['welcome'];
-    theaters: VoyagePromptCopy['theaters'] & {
-      description: (city: string, theater: string, count: number) => string;
-    };
     gratitude: VoyagePromptCopy['gratitude'];
   };
   methodLink: string;
@@ -133,7 +130,6 @@ const missionOrder: VoyageMission[] = [
 ];
 
 const WELCOME_STORAGE_KEY = 'imax-odyssey:welcome-date';
-const THEATER_PROMPT_SESSION_KEY = 'imax-odyssey:theater-prompt';
 const GRATITUDE_STORAGE_KEY = 'imax-odyssey:gratitude-prompt';
 const GRATITUDE_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
 const GRATITUDE_DWELL_MS = 30 * 1000;
@@ -163,7 +159,6 @@ export function VoyageExperience({
     null
   );
   const [blessingIndex, setBlessingIndex] = useState(0);
-  const [theaterPromptPending, setTheaterPromptPending] = useState(false);
   const [resultsEngaged, setResultsEngaged] = useState(false);
   const [sharePreview, setSharePreview] = useState<{
     url: string;
@@ -186,29 +181,12 @@ export function VoyageExperience({
     onSuccess: (data) => {
       setResult(data);
       setShowVoyage(false);
-      if (
-        data.matches.length > 0 &&
-        readStorage('session', THEATER_PROMPT_SESSION_KEY) !== '1'
-      ) {
-        writeStorage('session', THEATER_PROMPT_SESSION_KEY, '1');
-        setTheaterPromptPending(true);
-      }
     },
     onError: (error: Error) => {
       setShowVoyage(false);
       toast.error(error.message);
     },
   });
-
-  useEffect(() => {
-    if (!theaterPromptPending || activePrompt || sharePreview) return;
-
-    const timer = window.setTimeout(() => {
-      setTheaterPromptPending(false);
-      setActivePrompt('theaters');
-    }, 550);
-    return () => window.clearTimeout(timer);
-  }, [activePrompt, sharePreview, theaterPromptPending]);
 
   useEffect(() => {
     setResultsEngaged(false);
@@ -236,7 +214,6 @@ export function VoyageExperience({
     if (
       !resultsEngaged ||
       activePrompt ||
-      theaterPromptPending ||
       sharePreview ||
       gratitudePromptWasShownRecently()
     ) {
@@ -258,7 +235,7 @@ export function VoyageExperience({
       window.clearTimeout(dwellTimer);
       if (retryTimer) window.clearTimeout(retryTimer);
     };
-  }, [activePrompt, resultsEngaged, sharePreview, theaterPromptPending]);
+  }, [activePrompt, resultsEngaged, sharePreview]);
 
   const form = useForm({
     defaultValues: { departure: '', mission: 'closest' as VoyageMission },
@@ -280,45 +257,47 @@ export function VoyageExperience({
   });
 
   const nearestMatch = result?.matches[0];
-  const theaterPromptDescription =
-    result && nearestMatch
-      ? copy.popups.theaters.description(
-          result.departure.city,
-          nearestMatch.theater.name,
-          result.matches.length
-        )
-      : '';
 
   function useCurrentLocation() {
-    if (!navigator.geolocation) {
+    if (isLocating || mutation.isPending) return;
+
+    if (typeof window === 'undefined' || !window.navigator.geolocation) {
       toast.error(copy.locationUnsupported);
       return;
     }
 
+    const mission = form.state.values.mission;
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setIsLocating(false);
-        setShowVoyage(true);
-        mutation.mutate({
-          departure: copy.currentLocation,
-          mission: form.state.values.mission,
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        });
-      },
-      (error) => {
-        setIsLocating(false);
-        toast.error(
-          error.code === 1 ? copy.locationDenied : copy.locationUnavailable
-        );
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 10_000,
-        maximumAge: 5 * 60_000,
-      }
-    );
+    try {
+      window.navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          setIsLocating(false);
+          setShowVoyage(true);
+          mutation.mutate({
+            departure: copy.currentLocation,
+            mission,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          });
+        },
+        (error) => {
+          setIsLocating(false);
+          toast.error(
+            error.code === error.PERMISSION_DENIED
+              ? copy.locationDenied
+              : copy.locationUnavailable
+          );
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10_000,
+          maximumAge: 5 * 60_000,
+        }
+      );
+    } catch {
+      setIsLocating(false);
+      toast.error(copy.locationUnavailable);
+    }
   }
 
   async function openShareCard() {
@@ -331,28 +310,6 @@ export function VoyageExperience({
       seo.canonicalUrl
     );
     setSharePreview(card);
-  }
-
-  function openNearestTheaterInMaps() {
-    if (!nearestMatch) return;
-    setActivePrompt(null);
-    window.open(
-      theaterDirectionsUrl(nearestMatch.theater),
-      '_blank',
-      'noopener,noreferrer'
-    );
-  }
-
-  function viewTheaters() {
-    setActivePrompt(null);
-    window.setTimeout(() => {
-      resultsRef.current?.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          ? 'auto'
-          : 'smooth',
-        block: 'start',
-      });
-    }, 80);
   }
 
   function shareFromPrompt() {
@@ -545,19 +502,10 @@ export function VoyageExperience({
         copy={{
           close: copy.close,
           welcome: copy.popups.welcome,
-          theaters: {
-            eyebrow: copy.popups.theaters.eyebrow,
-            title: copy.popups.theaters.title,
-            maps: copy.popups.theaters.maps,
-            view: copy.popups.theaters.view,
-          },
           gratitude: copy.popups.gratitude,
         }}
         blessingIndex={blessingIndex}
-        theaterDescription={theaterPromptDescription}
         onClose={() => setActivePrompt(null)}
-        onOpenMaps={openNearestTheaterInMaps}
-        onViewTheaters={viewTheaters}
         onShare={shareFromPrompt}
       />
 

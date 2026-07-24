@@ -89,18 +89,6 @@ export function Voyage() {
             blessings: createVoyageBlessings(),
             cta: m['voyage.popup.welcome.cta'](),
           },
-          theaters: {
-            eyebrow: m['voyage.popup.theaters.eyebrow'](),
-            title: m['voyage.popup.theaters.title'](),
-            description: (city, theater, count) =>
-              m['voyage.popup.theaters.description']({
-                city,
-                theater,
-                count,
-              }),
-            maps: m['voyage.popup.theaters.maps'](),
-            view: m['voyage.popup.theaters.view'](),
-          },
           gratitude: {
             eyebrow: m['voyage.popup.gratitude.eyebrow'](),
             title: m['voyage.popup.gratitude.title'](),
