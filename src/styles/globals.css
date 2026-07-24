@@ -953,13 +953,13 @@
     min-height: 420px;
   }
   .voyage-featured-theater {
-    grid-row: 2;
+    grid-row: 3;
   }
   .odyssey-map svg {
     min-height: 420px;
   }
   .voyage-search {
-    grid-row: 3;
+    grid-row: 2;
   }
   .voyage-missions {
     grid-template-columns: repeat(2, 1fr);
