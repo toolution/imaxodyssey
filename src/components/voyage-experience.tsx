@@ -1,15 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import {
   Anchor,
   Check,
-  Clock3,
-  Compass,
   Download,
   ExternalLink,
-  Film,
   Info,
+  LoaderCircle,
+  LocateFixed,
   Navigation,
   Route as RouteIcon,
   Share2,
@@ -22,11 +21,11 @@ import { z } from 'zod';
 
 import { apiPost } from '@/lib/api-client';
 import {
-  ADVENTURE_LABELS,
   type TheaterCapability,
   type VoyageMission,
-  type VoyageRoute,
+  type VoyageSearchRequest,
   type VoyageSearchResult,
+  type VoyageTheaterMatch,
 } from '@/lib/voyage';
 import { TextField } from '@/components/form-field';
 import { Button } from '@/components/ui/button';
@@ -38,13 +37,18 @@ export interface VoyageCopy {
   subheadline: string;
   departureLabel: string;
   departurePlaceholder: string;
+  useLocation: string;
+  locating: string;
+  currentLocation: string;
+  locationUnsupported: string;
+  locationDenied: string;
+  locationUnavailable: string;
   submit: string;
   searching: string;
   skip: string;
   missionsLabel: string;
   missions: Record<VoyageMission, { title: string; description: string }>;
-  shortest: string;
-  hero: string;
+  nearest: string;
   capability: string;
   aspectRatio: string;
   equipment: string;
@@ -63,16 +67,12 @@ export interface VoyageCopy {
   close: string;
   methodLink: string;
   resultTitle: string;
-  resultSummary: (city: string, theater: string) => string;
-  routeTabsLabel: string;
+  resultSummary: (city: string, count: number) => string;
+  resultsLabel: string;
   methodEyebrow: string;
   methodTitle: string;
   progressEvents: string[];
   progressNote: string;
-  chartLabel: string;
-  chartImageLabel: string;
-  region: string;
-  regions: string;
   worthYes: string;
   worthNo: string;
   source: string;
@@ -109,50 +109,6 @@ const missionOrder: VoyageMission[] = [
   'worth-voyage',
 ];
 
-const initialResult: VoyageSearchResult = {
-  departure: {
-    city: 'New York',
-    region: 'NY',
-    country: 'US',
-    latitude: 40.7128,
-    longitude: -74.006,
-  },
-  mission: 'closest',
-  routes: [
-    {
-      kind: 'shortest',
-      theater: {
-        id: 'amc-empire-25',
-        name: 'AMC Empire 25',
-        city: 'New York',
-        region: 'NY',
-        country: 'US',
-        latitude: 40.7567,
-        longitude: -73.9885,
-        formats: ['IMAX with Laser'],
-        projector: 'Commercial Laser',
-        aspectRatio: 'Up to 1.90:1',
-        has1570: false,
-        hasGtLaser: false,
-        worthVoyage: false,
-        screeningStatus: 'unknown',
-        verifiedAt: '2026-07-01',
-        sourceUrl: 'https://www.imax.com/theatre/amc-empire-25-imax',
-        confidence: 'medium',
-      },
-      distanceMeters: 9656,
-      durationSeconds: 1560,
-      geometry: [],
-      estimated: false,
-      regionCount: 1,
-      adventureTier: 'athenas-favor',
-      formatScore: 58,
-    },
-  ],
-  searchedTheaters: 23,
-  usedEstimatedRoutes: false,
-};
-
 export function VoyageExperience({
   copy,
   seo,
@@ -160,26 +116,19 @@ export function VoyageExperience({
   copy: VoyageCopy;
   seo: VoyageSeoCopy;
 }) {
-  const [result, setResult] = useState<VoyageSearchResult | null>(
-    initialResult
-  );
-  const [selectedRoute, setSelectedRoute] = useState<'shortest' | 'hero'>(
-    'shortest'
-  );
+  const [result, setResult] = useState<VoyageSearchResult | null>(null);
   const [showVoyage, setShowVoyage] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [sharePreview, setSharePreview] = useState<{
     url: string;
     blob: Blob;
   } | null>(null);
 
   const mutation = useMutation({
-    mutationFn: (request: { departure: string; mission: VoyageMission }) =>
+    mutationFn: (request: VoyageSearchRequest) =>
       apiPost<VoyageSearchResult>('/api/voyage/search', request),
     onSuccess: (data) => {
       setResult(data);
-      setSelectedRoute(
-        data.routes.some((route) => route.kind === 'hero') ? 'hero' : 'shortest'
-      );
       setShowVoyage(false);
     },
     onError: (error: Error) => {
@@ -207,13 +156,43 @@ export function VoyageExperience({
     },
   });
 
-  const activeRoute =
-    result?.routes.find((route) => route.kind === selectedRoute) ??
-    result?.routes[0];
+  const nearestMatch = result?.matches[0];
+
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      toast.error(copy.locationUnsupported);
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setIsLocating(false);
+        setShowVoyage(true);
+        mutation.mutate({
+          departure: copy.currentLocation,
+          mission: form.state.values.mission,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        });
+      },
+      (error) => {
+        setIsLocating(false);
+        toast.error(
+          error.code === 1 ? copy.locationDenied : copy.locationUnavailable
+        );
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10_000,
+        maximumAge: 5 * 60_000,
+      }
+    );
+  }
 
   async function openShareCard() {
-    if (!result || !activeRoute) return;
-    const card = await createShareCard(result, activeRoute, copy);
+    if (!result || !nearestMatch) return;
+    const card = await createShareCard(result, nearestMatch, copy);
     setSharePreview(card);
   }
 
@@ -289,26 +268,33 @@ export function VoyageExperience({
                   </div>
                 )}
               </form.Field>
-              <Button
-                className="voyage-submit"
-                type="submit"
-                disabled={mutation.isPending}
-              >
-                <Navigation aria-hidden="true" />
-                {mutation.isPending ? copy.searching : copy.submit}
-              </Button>
+              <div className="voyage-departure-actions">
+                <Button
+                  className="voyage-location-button"
+                  type="button"
+                  variant="outline"
+                  disabled={isLocating || mutation.isPending}
+                  data-loading={isLocating}
+                  onClick={useCurrentLocation}
+                >
+                  {isLocating ? (
+                    <LoaderCircle aria-hidden="true" />
+                  ) : (
+                    <LocateFixed aria-hidden="true" />
+                  )}
+                  {isLocating ? copy.locating : copy.useLocation}
+                </Button>
+                <Button
+                  className="voyage-submit"
+                  type="submit"
+                  disabled={isLocating || mutation.isPending}
+                >
+                  <Navigation aria-hidden="true" />
+                  {mutation.isPending ? copy.searching : copy.submit}
+                </Button>
+              </div>
             </div>
           </form>
-
-          {activeRoute ? (
-            <div className="voyage-featured-theater">
-              <TheaterIsland
-                route={activeRoute}
-                country={result?.departure.country ?? 'US'}
-                copy={copy}
-              />
-            </div>
-          ) : null}
 
           {mutation.isPending && showVoyage ? (
             <VoyageProgress copy={copy} onSkip={() => setShowVoyage(false)} />
@@ -323,19 +309,18 @@ export function VoyageExperience({
           </section>
         ) : null}
 
-        {result && activeRoute ? (
+        {result && nearestMatch ? (
           <section className="voyage-results" aria-labelledby="result-heading">
             <div className="voyage-result-heading">
               <div>
                 <p className="voyage-eyebrow">
-                  <Sparkles aria-hidden="true" />{' '}
-                  {ADVENTURE_LABELS[activeRoute.adventureTier]}
+                  <Sparkles aria-hidden="true" /> {copy.nearest}
                 </p>
                 <h2 id="result-heading">{copy.resultTitle}</h2>
                 <p>
                   {copy.resultSummary(
                     result.departure.city,
-                    activeRoute.theater.name
+                    result.matches.length
                   )}
                 </p>
               </div>
@@ -344,40 +329,17 @@ export function VoyageExperience({
               </Button>
             </div>
 
-            <div
-              className="voyage-route-tabs"
-              role="tablist"
-              aria-label={copy.routeTabsLabel}
-            >
-              {result.routes.map((route) => (
-                <button
-                  type="button"
-                  role="tab"
-                  key={route.kind}
-                  aria-selected={selectedRoute === route.kind}
-                  data-active={selectedRoute === route.kind}
-                  onClick={() => setSelectedRoute(route.kind)}
-                >
-                  {route.kind === 'shortest' ? (
-                    <Clock3 aria-hidden="true" />
-                  ) : (
-                    <Sparkles aria-hidden="true" />
-                  )}
-                  <span>
-                    <strong>
-                      {route.kind === 'shortest' ? copy.shortest : copy.hero}
-                    </strong>
-                    <small>
-                      {formatDistance(
-                        route.distanceMeters,
-                        result.departure.country
-                      )}{' '}
-                      · {formatDuration(route.durationSeconds)}
-                    </small>
-                  </span>
-                </button>
+            <ol className="voyage-theater-grid" aria-label={copy.resultsLabel}>
+              {result.matches.map((match) => (
+                <li key={match.theater.id}>
+                  <TheaterIsland
+                    match={match}
+                    country={result.departure.country}
+                    copy={copy}
+                  />
+                </li>
               ))}
-            </div>
+            </ol>
           </section>
         ) : null}
 
@@ -410,11 +372,11 @@ export function VoyageExperience({
         <p>{copy.disclaimer}</p>
       </footer>
 
-      {sharePreview && result && activeRoute ? (
+      {sharePreview && result && nearestMatch ? (
         <ShareDialog
           preview={sharePreview}
           result={result}
-          route={activeRoute}
+          match={nearestMatch}
           copy={copy}
           onClose={() => {
             URL.revokeObjectURL(sharePreview.url);
@@ -566,231 +528,31 @@ function VoyageProgress({
   );
 }
 
-function OdysseyMap({
-  result,
-  activeKind,
-  searching,
-  copy,
-}: {
-  result: VoyageSearchResult | null;
-  activeKind: 'shortest' | 'hero';
-  searching: boolean;
-  copy: VoyageCopy;
-}) {
-  const projected = useMemo(
-    () => buildMapProjection(result?.routes ?? []),
-    [result]
-  );
-  return (
-    <div
-      className="odyssey-map"
-      data-searching={searching}
-      aria-label={copy.chartLabel}
-    >
-      <div className="map-tiles" aria-hidden="true">
-        {projected.tiles.map((tile) => (
-          <span
-            key={`${tile.z}-${tile.x}-${tile.y}`}
-            className="map-tile"
-            style={{
-              backgroundImage: `url("/api/voyage/tile?z=${tile.z}&x=${tile.x}&y=${tile.y}")`,
-              left: `${tile.left / 10}%`,
-              top: `${(tile.top / 520) * 100}%`,
-              width: `${tile.size / 10}%`,
-              height: `${(tile.size / 520) * 100}%`,
-            }}
-          />
-        ))}
-      </div>
-      <svg viewBox="0 0 1000 520" role="img" aria-label={copy.chartImageLabel}>
-        <defs>
-          <filter id="route-glow">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        {result
-          ? projected.routes.map((route) => (
-              <g
-                key={route.kind}
-                data-active={route.kind === activeKind}
-                className={`projected-route projected-${route.kind}`}
-              >
-                <polyline points={route.points} />
-                <circle
-                  className="route-origin"
-                  cx={route.start.x}
-                  cy={route.start.y}
-                  r="9"
-                />
-                <circle
-                  className="route-destination-ring"
-                  cx={route.end.x}
-                  cy={route.end.y}
-                  r={route.kind === activeKind ? 18 : 13}
-                />
-                <circle
-                  className="route-destination"
-                  cx={route.end.x}
-                  cy={route.end.y}
-                  r={route.kind === activeKind ? 8 : 6}
-                />
-              </g>
-            ))
-          : null}
-      </svg>
-      <span className="map-attribution">
-        ©{' '}
-        <a
-          href="https://www.maptiler.com/copyright/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          MapTiler
-        </a>{' '}
-        ©{' '}
-        <a
-          href="https://www.openstreetmap.org/copyright"
-          target="_blank"
-          rel="noreferrer"
-        >
-          OpenStreetMap
-        </a>
-      </span>
-    </div>
-  );
-}
-
-function buildMapProjection(routes: VoyageRoute[]) {
-  const viewWidth = 1000;
-  const viewHeight = 520;
-  const tileSize = 512;
-  const idleBounds: [number, number, number, number] = [-129, 24, -62, 52];
-  const all = routes.flatMap((route) => route.geometry);
-  const bounds = all.length ? geographicBounds(all) : idleBounds;
-  const northWest = mercatorPoint([bounds[0], bounds[3]]);
-  const southEast = mercatorPoint([bounds[2], bounds[1]]);
-  const normalizedWidth = Math.max(southEast.x - northWest.x, 0.00001);
-  const normalizedHeight = Math.max(southEast.y - northWest.y, 0.00001);
-  let zoom = 0;
-  for (let candidate = 1; candidate <= 13; candidate += 1) {
-    const worldSize = tileSize * 2 ** candidate;
-    if (
-      normalizedWidth * worldSize <= viewWidth * 0.76 &&
-      normalizedHeight * worldSize <= viewHeight * 0.72
-    ) {
-      zoom = candidate;
-    } else break;
-  }
-
-  const worldSize = tileSize * 2 ** zoom;
-  const centerX = ((northWest.x + southEast.x) / 2) * worldSize;
-  const centerY = ((northWest.y + southEast.y) / 2) * worldSize;
-  const topLeftX = centerX - viewWidth / 2;
-  const topLeftY = centerY - viewHeight / 2;
-  const firstTileX = Math.floor(topLeftX / tileSize);
-  const lastTileX = Math.floor((topLeftX + viewWidth) / tileSize);
-  const firstTileY = Math.floor(topLeftY / tileSize);
-  const lastTileY = Math.floor((topLeftY + viewHeight) / tileSize);
-  const tileCount = 2 ** zoom;
-  const tiles = [];
-  for (let tileY = firstTileY; tileY <= lastTileY; tileY += 1) {
-    if (tileY < 0 || tileY >= tileCount) continue;
-    for (let tileX = firstTileX; tileX <= lastTileX; tileX += 1) {
-      const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
-      tiles.push({
-        z: zoom,
-        x: wrappedX,
-        y: tileY,
-        left: tileX * tileSize - topLeftX,
-        top: tileY * tileSize - topLeftY,
-        size: tileSize,
-      });
-    }
-  }
-
-  const project = (coordinate: [number, number]) => {
-    const point = mercatorPoint(coordinate);
-    return {
-      x: point.x * worldSize - topLeftX,
-      y: point.y * worldSize - topLeftY,
-    };
-  };
-  return {
-    tiles,
-    routes: routes.map((route) => {
-      const points = route.geometry.map(project);
-      return {
-        kind: route.kind,
-        points: points.map((point) => `${point.x},${point.y}`).join(' '),
-        start: points[0],
-        end: points[points.length - 1],
-      };
-    }),
-  };
-}
-
-function geographicBounds(
-  coordinates: [number, number][]
-): [number, number, number, number] {
-  const longitudes = coordinates.map(([longitude]) => longitude);
-  const latitudes = coordinates.map(([, latitude]) => latitude);
-  const west = Math.min(...longitudes);
-  const east = Math.max(...longitudes);
-  const south = Math.min(...latitudes);
-  const north = Math.max(...latitudes);
-  const longitudePadding = Math.max((east - west) * 0.18, 0.02);
-  const latitudePadding = Math.max((north - south) * 0.22, 0.015);
-  return [
-    Math.max(-180, west - longitudePadding),
-    Math.max(-85, south - latitudePadding),
-    Math.min(180, east + longitudePadding),
-    Math.min(85, north + latitudePadding),
-  ];
-}
-
-function mercatorPoint([longitude, latitude]: [number, number]) {
-  const clampedLatitude = Math.max(-85.051129, Math.min(85.051129, latitude));
-  const radians = (clampedLatitude * Math.PI) / 180;
-  return {
-    x: (longitude + 180) / 360,
-    y: (1 - Math.log(Math.tan(radians) + 1 / Math.cos(radians)) / Math.PI) / 2,
-  };
-}
-
 function TheaterIsland({
-  route,
+  match,
   country,
   copy,
 }: {
-  route: VoyageRoute;
+  match: VoyageTheaterMatch;
   country: string;
   copy: VoyageCopy;
 }) {
-  const theater = route.theater;
+  const theater = match.theater;
   return (
     <article className="theater-island">
       <div className="theater-island-top">
-        <div className="theater-seal">
-          <Film aria-hidden="true" />
+        <div className="theater-seal" aria-label={`#${match.rank}`}>
+          {String(match.rank).padStart(2, '0')}
         </div>
         <div>
           <p>
             {[theater.city, theater.region].filter(Boolean).join(', ')} ·{' '}
             {theater.countryName ?? theater.country}
           </p>
-          <h2>{theater.name}</h2>
+          <h3>{theater.name}</h3>
           <div className="theater-journey">
-            <strong>{formatDistance(route.distanceMeters, country)}</strong>
-            <span>{formatDuration(route.durationSeconds)}</span>
-            <span>
-              {route.regionCount}{' '}
-              {route.regionCount === 1 ? copy.region : copy.regions}
-            </span>
-            {route.estimated ? <span>{copy.estimated}</span> : null}
+            <strong>{formatDistance(match.distanceMeters, country)}</strong>
+            <span>{copy.estimated}</span>
           </div>
         </div>
       </div>
@@ -871,16 +633,9 @@ function formatDistance(meters: number, country: string) {
     : `${Math.round(kilometers).toLocaleString()} km`;
 }
 
-function formatDuration(seconds: number) {
-  const minutes = Math.max(1, Math.round(seconds / 60));
-  const hours = Math.floor(minutes / 60);
-  const remainder = minutes % 60;
-  return hours ? `${hours} hr ${remainder} min` : `${remainder} min`;
-}
-
 async function createShareCard(
   result: VoyageSearchResult,
-  route: VoyageRoute,
+  match: VoyageTheaterMatch,
   copy: VoyageCopy
 ) {
   const canvas = document.createElement('canvas');
@@ -916,23 +671,23 @@ async function createShareCard(
   ctx.font = '700 38px Georgia';
   ctx.fillText(copy.brand.toUpperCase(), 100, 150);
   ctx.font = '700 74px Georgia';
-  wrapCanvasText(ctx, ADVENTURE_LABELS[route.adventureTier], 100, 300, 850, 86);
+  wrapCanvasText(ctx, copy.nearest, 100, 300, 850, 86);
   ctx.fillStyle = '#6fb7b0';
   ctx.font = '600 32px Arial';
   ctx.fillText(result.departure.city.toUpperCase(), 100, 520);
   ctx.fillStyle = '#e8d9b5';
   ctx.font = '700 48px Georgia';
-  wrapCanvasText(ctx, route.theater.name, 100, 610, 820, 58);
+  wrapCanvasText(ctx, match.theater.name, 100, 610, 820, 58);
   ctx.font = '700 44px Arial';
   ctx.fillStyle = '#d7b56d';
   ctx.fillText(
-    `${formatDistance(route.distanceMeters, result.departure.country)} · ${formatDuration(route.durationSeconds)}`,
+    formatDistance(match.distanceMeters, result.departure.country),
     100,
     1430
   );
   ctx.font = '400 30px Arial';
   ctx.fillStyle = '#e8d9b5';
-  ctx.fillText(route.theater.formats.join(' · '), 100, 1500);
+  ctx.fillText(match.theater.formats.join(' · '), 100, 1500);
   ctx.font = '700 50px Georgia';
   ctx.fillStyle = '#e8d9b5';
   ctx.fillText(copy.shareQuestion, 100, 1725);
@@ -972,13 +727,13 @@ function wrapCanvasText(
 function ShareDialog({
   preview,
   result,
-  route,
+  match,
   copy,
   onClose,
 }: {
   preview: { url: string; blob: Blob };
   result: VoyageSearchResult;
-  route: VoyageRoute;
+  match: VoyageTheaterMatch;
   copy: VoyageCopy;
   onClose: () => void;
 }) {
@@ -1014,10 +769,7 @@ function ShareDialog({
         aria-label={copy.close}
       />
       <div className="share-dialog-panel">
-        <img
-          src={preview.url}
-          alt={`${ADVENTURE_LABELS[route.adventureTier]} share card`}
-        />
+        <img src={preview.url} alt={`${match.theater.name} share card`} />
         <div>
           <Button onClick={share}>
             <Share2 aria-hidden="true" /> {copy.systemShare}

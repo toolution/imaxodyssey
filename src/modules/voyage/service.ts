@@ -1,44 +1,47 @@
-import { geocodePort } from '@/core/maps/maptiler';
-import {
-  drivingMatrix,
-  drivingRoute,
-  haversineMeters,
-} from '@/core/maps/tomtom';
 import { theaterCatalog } from '@/config/theaters/catalog';
 import type {
-  AdventureTier,
   TheaterCapability,
   VoyageMission,
-  VoyageRoute,
   VoyageSearchResult,
 } from '@/lib/voyage';
 
-interface RankedCandidate {
-  theater: TheaterCapability;
-  distanceMeters: number;
-  durationSeconds: number;
-  formatScore: number;
+interface LocalDeparture {
+  city: string;
+  region: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  aliases: string[];
+  theaterCount?: number;
 }
 
-const cityCoordinateUncertainty = {
-  distanceMeters: 8_000,
-  durationSeconds: 15 * 60,
-};
-
-function coordinateUncertainty(theater: TheaterCapability) {
-  return theater.coordinatePrecision === 'city'
-    ? cityCoordinateUncertainty
-    : { distanceMeters: 0, durationSeconds: 0 };
+interface DepartureCoordinates {
+  latitude: number;
+  longitude: number;
 }
 
-export function adventureTier(durationSeconds: number): AdventureTier {
-  const minutes = durationSeconds / 60;
-  if (minutes < 30) return 'athenas-favor';
-  if (minutes < 90) return 'sirens-call';
-  if (minutes < 180) return 'cyclops-territory';
-  if (minutes < 360) return 'poseidons-curse';
-  return 'ten-year-odyssey';
-}
+const resultLimit = 6;
+
+const knownDepartures: LocalDeparture[] = [
+  departure('New York', 'NY', 'US', 40.7128, -74.006, ['10001']),
+  departure('Los Angeles', 'CA', 'US', 34.0522, -118.2437, ['90001']),
+  departure('San Francisco', 'CA', 'US', 37.7749, -122.4194),
+  departure('Chicago', 'IL', 'US', 41.8781, -87.6298),
+  departure('Dallas', 'TX', 'US', 32.7767, -96.797),
+  departure('Austin', 'TX', 'US', 30.2672, -97.7431),
+  departure('Boston', 'MA', 'US', 42.3601, -71.0589),
+  departure('Washington', 'DC', 'US', 38.9072, -77.0369),
+  departure('Toronto', 'ON', 'CA', 43.6532, -79.3832),
+  departure('Montreal', 'QC', 'CA', 45.5019, -73.5674),
+  departure('Vancouver', 'BC', 'CA', 49.2827, -123.1207),
+  departure('Calgary', 'AB', 'CA', 51.0447, -114.0719),
+  departure('London', 'England', 'GB', 51.5074, -0.1278),
+  departure('Tokyo', 'Tokyo', 'JP', 35.6762, 139.6503),
+  departure('Sydney', 'NSW', 'AU', -33.8688, 151.2093),
+  departure('Singapore', '', 'SG', 1.3521, 103.8198),
+];
+
+const catalogDepartures = buildCatalogDepartures();
 
 export function formatScore(theater: TheaterCapability) {
   let score = theater.has1570
@@ -57,79 +60,34 @@ export function formatScore(theater: TheaterCapability) {
 function appliesToMission(theater: TheaterCapability, mission: VoyageMission) {
   if (theater.commercialFilms === 'no') return false;
   if (mission === '70mm-only') return theater.has1570;
+  if (mission === 'best-format')
+    return (
+      theater.has1570 ||
+      theater.hasGtLaser ||
+      theater.aspectRatio.includes('1.43')
+    );
+  if (mission === 'worth-voyage') return theater.worthVoyage;
   return true;
-}
-
-function selectHero(
-  candidates: RankedCandidate[],
-  shortest: RankedCandidate,
-  mission: VoyageMission
-) {
-  if (mission === 'closest') return shortest;
-  const maxDuration =
-    mission === '70mm-only'
-      ? Number.POSITIVE_INFINITY
-      : shortest.durationSeconds + 3 * 3600;
-  return (
-    candidates
-      .filter((candidate) => candidate.durationSeconds <= maxDuration)
-      .sort((a, b) => {
-        const aUtility = a.formatScore * 1000 - a.durationSeconds / 15;
-        const bUtility = b.formatScore * 1000 - b.durationSeconds / 15;
-        return bUtility - aUtility;
-      })[0] ?? shortest
-  );
-}
-
-async function hydrateRoute(
-  candidate: RankedCandidate,
-  kind: 'shortest' | 'hero',
-  origin: [number, number],
-  originRegion: string,
-  originCountry: string
-): Promise<VoyageRoute> {
-  const destination: [number, number] = [
-    candidate.theater.longitude,
-    candidate.theater.latitude,
-  ];
-  const routed = await drivingRoute(origin, destination);
-  const uncertainty = coordinateUncertainty(candidate.theater);
-  const distanceMeters =
-    routed.metric.distanceMeters + uncertainty.distanceMeters;
-  const durationSeconds =
-    routed.metric.durationSeconds + uncertainty.durationSeconds;
-  return {
-    kind,
-    theater: candidate.theater,
-    distanceMeters,
-    durationSeconds,
-    geometry: routed.geometry,
-    estimated:
-      routed.estimated || candidate.theater.coordinatePrecision === 'city',
-    regionCount: new Set(
-      [
-        [originCountry, originRegion].filter(Boolean).join(':'),
-        [candidate.theater.country, candidate.theater.region]
-          .filter(Boolean)
-          .join(':'),
-      ].filter(Boolean)
-    ).size,
-    adventureTier: adventureTier(durationSeconds),
-    formatScore: candidate.formatScore,
-  };
 }
 
 export async function searchVoyages(
   departure: string,
-  mission: VoyageMission
+  mission: VoyageMission,
+  coordinates?: DepartureCoordinates
 ): Promise<VoyageSearchResult> {
-  const port = await geocodePort(departure);
-  const origin: [number, number] = [port.longitude, port.latitude];
+  const port = coordinates
+    ? {
+        city: departure,
+        region: '',
+        country: '',
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+      }
+    : resolveDeparture(departure);
   const eligible = theaterCatalog
     .filter((theater) => appliesToMission(theater, mission))
     .map((theater) => {
-      const uncertainty = coordinateUncertainty(theater);
-      const directMeters = haversineMeters(
+      const distanceMeters = haversineMeters(
         port.latitude,
         port.longitude,
         theater.latitude,
@@ -137,59 +95,176 @@ export async function searchVoyages(
       );
       return {
         theater,
-        directMeters,
-        uncertainty,
-        rankingMeters: directMeters + uncertainty.distanceMeters,
-      };
-    })
-    .sort((a, b) => a.rankingMeters - b.rankingMeters)
-    .slice(0, 23);
-
-  if (!eligible.length)
-    throw new Error(
-      'Poseidon has blocked this route. No matching theater is in the current chart.'
-    );
-  const metrics = await drivingMatrix(
-    origin,
-    eligible.map(({ theater }) => [theater.longitude, theater.latitude])
-  );
-  const ranked: RankedCandidate[] = eligible
-    .map(({ theater, directMeters, uncertainty }, index) => {
-      const estimatedDistance = directMeters * 1.2;
-      return {
-        theater,
-        distanceMeters:
-          (metrics[index]?.distanceMeters ?? estimatedDistance) +
-          uncertainty.distanceMeters,
-        durationSeconds:
-          (metrics[index]?.durationSeconds ??
-            (estimatedDistance / 1609.344 / 55) * 3600) +
-          uncertainty.durationSeconds,
+        distanceMeters,
         formatScore: formatScore(theater),
       };
     })
-    .sort((a, b) => a.durationSeconds - b.durationSeconds);
+    .sort((a, b) => a.distanceMeters - b.distanceMeters);
 
-  const shortest = ranked[0];
-  const hero = selectHero(ranked, shortest, mission);
-  const shortestRoute = await hydrateRoute(
-    shortest,
-    'shortest',
-    origin,
-    port.region,
-    port.country
-  );
-  const routes = [shortestRoute];
-  if (hero.theater.id !== shortest.theater.id)
-    routes.push(
-      await hydrateRoute(hero, 'hero', origin, port.region, port.country)
-    );
+  if (!eligible.length)
+    throw new Error('No matching theater is available in the current catalog.');
 
   return {
-    departure: port,
+    departure: port.country
+      ? port
+      : { ...port, country: eligible[0].theater.country },
     mission,
-    routes,
+    matches: eligible.slice(0, resultLimit).map((candidate, index) => ({
+      rank: index + 1,
+      ...candidate,
+    })),
     searchedTheaters: eligible.length,
-    usedEstimatedRoutes: routes.some((route) => route.estimated),
   };
+}
+
+function departure(
+  city: string,
+  region: string,
+  country: string,
+  latitude: number,
+  longitude: number,
+  extraAliases: string[] = []
+): LocalDeparture {
+  return {
+    city,
+    region,
+    country,
+    latitude,
+    longitude,
+    aliases: locationAliases(city, region, country, extraAliases),
+  };
+}
+
+function buildCatalogDepartures() {
+  const groups = new Map<
+    string,
+    LocalDeparture & { latitudeTotal: number; longitudeTotal: number }
+  >();
+
+  for (const theater of theaterCatalog) {
+    const key = [theater.city, theater.region, theater.country]
+      .map(normalizeLocation)
+      .join('|');
+    const existing = groups.get(key);
+    if (existing) {
+      existing.latitudeTotal += theater.latitude;
+      existing.longitudeTotal += theater.longitude;
+      existing.theaterCount = (existing.theaterCount ?? 0) + 1;
+      continue;
+    }
+
+    groups.set(key, {
+      city: theater.city,
+      region: theater.region,
+      country: theater.country,
+      latitude: theater.latitude,
+      longitude: theater.longitude,
+      latitudeTotal: theater.latitude,
+      longitudeTotal: theater.longitude,
+      theaterCount: 1,
+      aliases: locationAliases(
+        theater.city,
+        theater.region,
+        theater.country,
+        theater.countryName
+          ? [
+              `${theater.city} ${theater.countryName}`,
+              `${theater.city} ${theater.region} ${theater.countryName}`,
+            ]
+          : []
+      ),
+    });
+  }
+
+  return [...groups.values()].map((entry) => ({
+    city: entry.city,
+    region: entry.region,
+    country: entry.country,
+    latitude: entry.latitudeTotal / (entry.theaterCount ?? 1),
+    longitude: entry.longitudeTotal / (entry.theaterCount ?? 1),
+    theaterCount: entry.theaterCount,
+    aliases: entry.aliases,
+  }));
+}
+
+function locationAliases(
+  city: string,
+  region: string,
+  country: string,
+  extraAliases: string[] = []
+) {
+  return [
+    city,
+    [city, region].filter(Boolean).join(' '),
+    [city, country].filter(Boolean).join(' '),
+    [city, region, country].filter(Boolean).join(' '),
+    ...extraAliases,
+  ]
+    .map(normalizeLocation)
+    .filter(Boolean);
+}
+
+function resolveDeparture(query: string) {
+  const normalizedQuery = normalizeLocation(query);
+  if (!normalizedQuery)
+    throw new Error('Enter a city represented in the theater catalog.');
+
+  const known = knownDepartures.find((entry) =>
+    entry.aliases.includes(normalizedQuery)
+  );
+  if (known) return stripAliases(known);
+
+  const exactMatches = catalogDepartures
+    .filter((entry) => entry.aliases.includes(normalizedQuery))
+    .sort((a, b) => (b.theaterCount ?? 0) - (a.theaterCount ?? 0));
+  if (exactMatches[0]) return stripAliases(exactMatches[0]);
+
+  const partialMatches = catalogDepartures
+    .filter((entry) =>
+      entry.aliases.some(
+        (alias) =>
+          alias.startsWith(normalizedQuery) || normalizedQuery.startsWith(alias)
+      )
+    )
+    .sort((a, b) => (b.theaterCount ?? 0) - (a.theaterCount ?? 0));
+  if (partialMatches[0]) return stripAliases(partialMatches[0]);
+
+  throw new Error(
+    'No local departure location was found. Enter a city represented in the theater catalog.'
+  );
+}
+
+function stripAliases({
+  aliases: _aliases,
+  theaterCount: _count,
+  ...port
+}: LocalDeparture) {
+  return port;
+}
+
+function normalizeLocation(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^\p{Letter}\p{Number}]+/gu, ' ')
+    .trim();
+}
+
+export function haversineMeters(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) {
+  const toRadians = (value: number) => (value * Math.PI) / 180;
+  const earthRadiusMeters = 6_371_000;
+  const latitudeDelta = toRadians(lat2 - lat1);
+  const longitudeDelta = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(longitudeDelta / 2) ** 2;
+  return 2 * earthRadiusMeters * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }

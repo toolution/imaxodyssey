@@ -24,17 +24,35 @@ async function POST({ request }: { request: Request }) {
     const departure =
       typeof body?.departure === 'string' ? body.departure.trim() : '';
     const mission = body?.mission as VoyageMission;
+    const hasLatitude = typeof body?.latitude === 'number';
+    const hasLongitude = typeof body?.longitude === 'number';
     if (departure.length < 2 || departure.length > 120)
-      return respErr('Enter a city or postal code.');
+      return respErr('Enter a city.');
     if (!missions.includes(mission)) return respErr('Choose a voyage mission.');
-    return respData(await searchVoyages(departure, mission), {
+    if (hasLatitude !== hasLongitude)
+      return respErr('Provide both latitude and longitude.');
+    const coordinates =
+      hasLatitude && hasLongitude
+        ? { latitude: body.latitude, longitude: body.longitude }
+        : undefined;
+    if (
+      coordinates &&
+      (!Number.isFinite(coordinates.latitude) ||
+        !Number.isFinite(coordinates.longitude) ||
+        coordinates.latitude < -90 ||
+        coordinates.latitude > 90 ||
+        coordinates.longitude < -180 ||
+        coordinates.longitude > 180)
+    )
+      return respErr('Invalid location coordinates.');
+    return respData(await searchVoyages(departure, mission, coordinates), {
       headers: { 'Cache-Control': 'private, no-store' },
     });
   } catch (error) {
     return respErr(
       error instanceof Error
         ? error.message
-        : 'Poseidon has blocked this route.'
+        : 'The theater search could not be completed.'
     );
   }
 }

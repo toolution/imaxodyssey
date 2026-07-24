@@ -6,13 +6,6 @@ export type VoyageMission =
 
 export type ScreeningStatus = 'confirmed' | 'not-confirmed' | 'unknown';
 
-export type AdventureTier =
-  | 'athenas-favor'
-  | 'sirens-call'
-  | 'cyclops-territory'
-  | 'poseidons-curse'
-  | 'ten-year-odyssey';
-
 export interface TheaterCapability {
   id: string;
   name: string;
@@ -39,17 +32,14 @@ export interface TheaterCapability {
 export interface VoyageSearchRequest {
   departure: string;
   mission: VoyageMission;
+  latitude?: number;
+  longitude?: number;
 }
 
-export interface VoyageRoute {
-  kind: 'shortest' | 'hero';
+export interface VoyageTheaterMatch {
+  rank: number;
   theater: TheaterCapability;
   distanceMeters: number;
-  durationSeconds: number;
-  geometry: [number, number][];
-  estimated: boolean;
-  regionCount: number;
-  adventureTier: AdventureTier;
   formatScore: number;
 }
 
@@ -62,15 +52,6 @@ export interface VoyageSearchResult {
     longitude: number;
   };
   mission: VoyageMission;
-  routes: VoyageRoute[];
+  matches: VoyageTheaterMatch[];
   searchedTheaters: number;
-  usedEstimatedRoutes: boolean;
 }
-
-export const ADVENTURE_LABELS: Record<AdventureTier, string> = {
-  'athenas-favor': "Athena's Favor",
-  'sirens-call': "The Sirens' Call",
-  'cyclops-territory': 'Cyclops Territory',
-  'poseidons-curse': "Poseidon's Curse",
-  'ten-year-odyssey': 'The Ten-Year Odyssey',
-};

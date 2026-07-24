@@ -21,8 +21,6 @@ export const envConfigs: Record<string, string> = {
     publicEnv('VITE_APP_DESCRIPTION') ??
     'Find the IMAX theater worth the voyage.',
   app_logo: publicEnv('VITE_APP_LOGO') ?? '/logo.svg',
-  maptiler_api_key: procEnv.MAPTILER_API_KEY ?? '',
-  tomtom_api_key: procEnv.TOMTOM_API_KEY ?? '',
 
   // Database
   database_url: procEnv.DATABASE_URL ?? '',
