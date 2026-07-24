@@ -867,63 +867,6 @@ body:has(.voyage-prompt) [data-slot='dialog-overlay'] {
   font-size: 14px;
   line-height: 1.65;
 }
-.voyage-prompt-steps {
-  margin-top: 24px;
-  padding: 0;
-  border-top: 1px solid rgb(215 181 109 / 22%);
-  list-style: none;
-}
-.voyage-prompt-steps li {
-  display: grid;
-  grid-template-columns: 38px 1fr;
-  gap: 14px;
-  align-items: start;
-  border-bottom: 1px solid rgb(215 181 109 / 16%);
-  padding: 16px 0;
-}
-.voyage-prompt-step-icon {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid rgb(111 183 176 / 34%);
-  border-radius: 50%;
-  color: var(--voyage-glass);
-}
-.voyage-prompt-step-icon svg {
-  width: 15px;
-  height: 15px;
-}
-.voyage-prompt-steps strong {
-  color: var(--voyage-parchment);
-  font-size: 13px;
-}
-.voyage-prompt-steps p {
-  margin-top: 4px;
-  color: rgb(232 217 181 / 58%);
-  font-size: 12px;
-  line-height: 1.55;
-}
-.voyage-blessing {
-  margin-top: 22px;
-  border-left: 2px solid var(--voyage-gold);
-  background: rgb(4 16 25 / 72%);
-  padding: 16px 18px;
-}
-.voyage-blessing span {
-  color: var(--voyage-gold);
-  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.voyage-blessing p {
-  margin-top: 8px;
-  color: var(--voyage-parchment);
-  font-family: var(--font-serif-display);
-  font-size: 17px;
-  line-height: 1.55;
-}
 .voyage-prompt-primary,
 .voyage-prompt-secondary {
   min-height: 46px;
@@ -1334,18 +1277,6 @@ body:has(.voyage-prompt) [data-slot='dialog-overlay'] {
   .voyage-prompt-gratitude [data-slot='dialog-title'] {
     padding-right: 32px;
     font-size: 29px;
-  }
-  .voyage-prompt-steps {
-    margin-top: 18px;
-  }
-  .voyage-prompt-steps li {
-    padding: 13px 0;
-  }
-  .voyage-blessing {
-    margin-top: 18px;
-  }
-  .voyage-blessing p {
-    font-size: 15px;
   }
   .voyage-prompt-actions {
     grid-template-columns: 1fr;

@@ -67,28 +67,6 @@ export function Voyage() {
         copyFailed: m['voyage.share.copy_failed'](),
         shareImageNote: m['voyage.share.image_note'](),
         popups: {
-          welcome: {
-            eyebrow: m['voyage.popup.welcome.eyebrow'](),
-            title: m['voyage.popup.welcome.title'](),
-            description: m['voyage.popup.welcome.description'](),
-            steps: [
-              {
-                title: m['voyage.popup.welcome.step1.title'](),
-                body: m['voyage.popup.welcome.step1.body'](),
-              },
-              {
-                title: m['voyage.popup.welcome.step2.title'](),
-                body: m['voyage.popup.welcome.step2.body'](),
-              },
-              {
-                title: m['voyage.popup.welcome.step3.title'](),
-                body: m['voyage.popup.welcome.step3.body'](),
-              },
-            ],
-            blessingLabel: m['voyage.popup.welcome.blessing.label'](),
-            blessings: createVoyageBlessings(),
-            cta: m['voyage.popup.welcome.cta'](),
-          },
           gratitude: {
             eyebrow: m['voyage.popup.gratitude.eyebrow'](),
             title: m['voyage.popup.gratitude.title'](),
@@ -226,49 +204,5 @@ export function Voyage() {
         ],
       }}
     />
-  );
-}
-
-function createVoyageBlessings() {
-  const openings = [
-    m['voyage.popup.welcome.blessing.opening1'](),
-    m['voyage.popup.welcome.blessing.opening2'](),
-    m['voyage.popup.welcome.blessing.opening3'](),
-    m['voyage.popup.welcome.blessing.opening4'](),
-    m['voyage.popup.welcome.blessing.opening5'](),
-    m['voyage.popup.welcome.blessing.opening6'](),
-    m['voyage.popup.welcome.blessing.opening7'](),
-    m['voyage.popup.welcome.blessing.opening8'](),
-    m['voyage.popup.welcome.blessing.opening9'](),
-    m['voyage.popup.welcome.blessing.opening10'](),
-  ];
-  const middles = [
-    m['voyage.popup.welcome.blessing.middle1'](),
-    m['voyage.popup.welcome.blessing.middle2'](),
-    m['voyage.popup.welcome.blessing.middle3'](),
-    m['voyage.popup.welcome.blessing.middle4'](),
-    m['voyage.popup.welcome.blessing.middle5'](),
-    m['voyage.popup.welcome.blessing.middle6'](),
-    m['voyage.popup.welcome.blessing.middle7'](),
-    m['voyage.popup.welcome.blessing.middle8'](),
-    m['voyage.popup.welcome.blessing.middle9'](),
-    m['voyage.popup.welcome.blessing.middle10'](),
-  ];
-  const endings = [
-    m['voyage.popup.welcome.blessing.ending1'](),
-    m['voyage.popup.welcome.blessing.ending2'](),
-    m['voyage.popup.welcome.blessing.ending3'](),
-  ];
-
-  return openings.flatMap((opening) =>
-    middles.flatMap((middle) =>
-      endings.map((ending) =>
-        m['voyage.popup.welcome.blessing.template']({
-          opening,
-          middle,
-          ending,
-        })
-      )
-    )
   );
 }

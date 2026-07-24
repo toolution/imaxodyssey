@@ -82,7 +82,6 @@ export interface VoyageCopy {
   copyFailed: string;
   shareImageNote: string;
   popups: {
-    welcome: VoyagePromptCopy['welcome'];
     gratitude: VoyagePromptCopy['gratitude'];
   };
   methodLink: string;
@@ -129,7 +128,6 @@ const missionOrder: VoyageMission[] = [
   'worth-voyage',
 ];
 
-const WELCOME_STORAGE_KEY = 'imax-odyssey:welcome-date';
 const GRATITUDE_STORAGE_KEY = 'imax-odyssey:gratitude-prompt';
 const GRATITUDE_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
 const GRATITUDE_DWELL_MS = 30 * 1000;
@@ -158,22 +156,11 @@ export function VoyageExperience({
   const [activePrompt, setActivePrompt] = useState<VoyagePromptKind | null>(
     null
   );
-  const [blessingIndex, setBlessingIndex] = useState(0);
   const [resultsEngaged, setResultsEngaged] = useState(false);
   const [sharePreview, setSharePreview] = useState<{
     url: string;
     blob: Blob;
   } | null>(null);
-
-  useEffect(() => {
-    const today = localDateStamp();
-    if (readStorage('local', WELCOME_STORAGE_KEY) === today) return;
-
-    writeStorage('local', WELCOME_STORAGE_KEY, today);
-    setBlessingIndex(randomIndex(copy.popups.welcome.blessings.length));
-    const timer = window.setTimeout(() => setActivePrompt('welcome'), 450);
-    return () => window.clearTimeout(timer);
-  }, [copy.popups.welcome.blessings.length]);
 
   const mutation = useMutation({
     mutationFn: (request: VoyageSearchRequest) =>
@@ -501,10 +488,8 @@ export function VoyageExperience({
         prompt={activePrompt}
         copy={{
           close: copy.close,
-          welcome: copy.popups.welcome,
           gratitude: copy.popups.gratitude,
         }}
-        blessingIndex={blessingIndex}
         onClose={() => setActivePrompt(null)}
         onShare={shareFromPrompt}
       />
@@ -774,20 +759,6 @@ function theaterDirectionsUrl(theater: TheaterCapability) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
 }
 
-function localDateStamp() {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${now.getFullYear()}-${month}-${day}`;
-}
-
-function randomIndex(length: number) {
-  if (length <= 1) return 0;
-  const values = new Uint32Array(1);
-  window.crypto.getRandomValues(values);
-  return values[0] % length;
-}
-
 function readStorage(kind: 'local' | 'session', key: string) {
   try {
     const storage =
@@ -804,7 +775,7 @@ function writeStorage(kind: 'local' | 'session', key: string, value: string) {
       kind === 'local' ? window.localStorage : window.sessionStorage;
     storage.setItem(key, value);
   } catch {
-    // Private browsing modes can disable storage; the popup still works.
+    // Private browsing modes can disable storage; the prompt still works.
   }
 }
 
