@@ -1343,3 +1343,64 @@ body:has(.voyage-prompt) [data-slot='dialog-overlay'] {
     }
   }
 }
+
+/* Mobile dialogs use the viewport as a bottom sheet so long forms and action
+   rows stay reachable above browser chrome, virtual keyboards, and safe areas. */
+@media (max-width: 639px) {
+  [data-slot='dialog-content']:not(.voyage-prompt) {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    max-height: calc(100vh - 12px);
+    max-height: calc(100dvh - max(12px, env(safe-area-inset-top)));
+    transform: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  [data-slot='dialog-content']:not(.voyage-prompt) > * {
+    min-width: 0;
+  }
+
+  [data-slot='dialog-content']:not(.voyage-prompt)
+    > [data-slot='dialog-close'] {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  [data-slot='dialog-content']:not(.voyage-prompt) [data-slot='dialog-title'] {
+    padding-right: 2.5rem;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+  }
+
+  [data-slot='dialog-content']:not(.voyage-prompt)
+    [data-slot='dialog-description'] {
+    overflow-wrap: anywhere;
+  }
+
+  [data-slot='dialog-content']:not(.voyage-prompt) [data-slot='dialog-footer'] {
+    margin-bottom: calc(0px - max(1rem, env(safe-area-inset-bottom)));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .share-dialog {
+    padding: max(12px, env(safe-area-inset-top)) 12px
+      max(12px, env(safe-area-inset-bottom));
+  }
+
+  .share-dialog-panel {
+    max-height: calc(100vh - 24px);
+    max-height: calc(
+      100dvh - max(24px, env(safe-area-inset-top)) -
+        max(24px, env(safe-area-inset-bottom))
+    );
+    overscroll-behavior-y: contain;
+  }
+}
