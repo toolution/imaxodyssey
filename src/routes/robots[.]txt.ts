@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { envConfigs } from '@/config';
+import { absoluteUrl } from '@/lib/seo';
 
 export const Route = createFileRoute('/robots.txt')({
   server: {
@@ -12,9 +12,8 @@ export const Route = createFileRoute('/robots.txt')({
           'Disallow: /admin',
           'Disallow: /settings',
           'Disallow: /api/',
-          'Disallow: /*?*',
           '',
-          `Sitemap: ${envConfigs.app_url}/sitemap.xml`,
+          `Sitemap: ${absoluteUrl('/sitemap.xml')}`,
           '',
         ].join('\n');
         return new Response(body, {

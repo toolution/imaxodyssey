@@ -298,9 +298,9 @@ export function Pricing({ title }: { title?: string } = {}) {
     >
       <div className="mx-auto max-w-5xl">
         <div className="mb-20 text-center">
-          <h2 className="font-serif text-4xl font-normal tracking-tight sm:text-5xl">
+          <h1 className="font-serif text-4xl font-normal tracking-tight sm:text-5xl">
             {title ?? m['landing.pricing.title']()}
-          </h2>
+          </h1>
           <p className="text-muted-foreground mt-5">
             {m['landing.pricing.description']()}
           </p>

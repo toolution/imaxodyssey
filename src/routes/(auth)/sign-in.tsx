@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
+import { noIndexHead } from './-seo';
+
 const signInSchema = z.object({
   email: z.string().email(m['common.sign.email_placeholder']()),
   password: z.string().min(1),
@@ -316,5 +318,6 @@ function SignInPage() {
 }
 
 export const Route = createFileRoute('/(auth)/sign-in')({
+  head: noIndexHead,
   component: SignInPage,
 });

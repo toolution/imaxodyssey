@@ -20,6 +20,8 @@ import {
 } from '@/components/ui/card';
 import { Field, FieldDescription, FieldGroup } from '@/components/ui/field';
 
+import { noIndexHead } from './-seo';
+
 const forgotSchema = z.object({
   email: z.string().email(m['common.sign.email_placeholder']()),
 });
@@ -168,5 +170,6 @@ function ForgotPasswordPage() {
 }
 
 export const Route = createFileRoute('/(auth)/forgot-password')({
+  head: noIndexHead,
   component: ForgotPasswordPage,
 });

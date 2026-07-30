@@ -3,7 +3,25 @@ import { createFileRoute } from '@tanstack/react-router';
 import { getAuth } from '@/core/auth';
 import * as postsService from '@/modules/posts/service';
 import { hasPermission } from '@/modules/rbac/service';
+import { submitIndexNow } from '@/lib/indexnow';
 import { respData, respErr, respOk, respPage } from '@/lib/resp';
+import { localizedUrl } from '@/lib/seo';
+import { baseLocale } from '@/paraglide/runtime.js';
+
+function publishedPostUrl(post: { slug: string; status: string } | undefined) {
+  return post?.status === postsService.PostStatus.PUBLISHED
+    ? localizedUrl(`/blog/${encodeURIComponent(post.slug)}`, baseLocale)
+    : null;
+}
+
+async function notifyIndexNow(
+  ...posts: Array<{ slug: string; status: string } | undefined>
+) {
+  const urls = posts
+    .map(publishedPostUrl)
+    .filter((url): url is string => Boolean(url));
+  await submitIndexNow(urls);
+}
 
 async function checkAdmin(request: Request) {
   const auth = getAuth();
@@ -72,6 +90,7 @@ async function POST({ request }: { request: Request }) {
       authorName,
       status,
     });
+    await notifyIndexNow(result);
     return respData(result);
   } catch (error: any) {
     return respErr(error.message || 'Internal error');
@@ -93,6 +112,8 @@ async function PUT({ request }: { request: Request }) {
       status,
     } = await request.json();
     if (!id) return respErr('ID is required');
+    const previous = await postsService.getById(id);
+    if (!previous) return respErr('Post not found');
     const result = await postsService.update(id, {
       slug,
       title,
@@ -103,6 +124,7 @@ async function PUT({ request }: { request: Request }) {
       authorName,
       status,
     });
+    await notifyIndexNow(previous, result);
     return respData(result);
   } catch (error: any) {
     return respErr(error.message || 'Internal error');
@@ -115,7 +137,10 @@ async function DELETE({ request }: { request: Request }) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return respErr('ID is required');
+    const previous = await postsService.getById(id);
+    if (!previous) return respErr('Post not found');
     await postsService.remove(id);
+    await notifyIndexNow(previous);
     return respOk();
   } catch (error: any) {
     return respErr(error.message || 'Internal error');

@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
+import { noIndexHead } from './-seo';
+
 function RedeemInvitePage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
@@ -160,5 +162,6 @@ function RedeemInvitePage() {
 }
 
 export const Route = createFileRoute('/(auth)/redeem-invite')({
+  head: noIndexHead,
   component: RedeemInvitePage,
 });

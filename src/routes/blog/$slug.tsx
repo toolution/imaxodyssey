@@ -4,8 +4,14 @@ import { ArrowLeft, Calendar } from 'lucide-react';
 
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
+import {
+  defaultSocialImage,
+  jsonLd,
+  localizedPageLinks,
+  publicRobotsMeta,
+} from '@/lib/seo';
 import { m } from '@/paraglide/messages.js';
-import { getLocale, localizeUrl } from '@/paraglide/runtime.js';
+import { getLocale } from '@/paraglide/runtime.js';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
 import { MarkdownContent } from '@/components/markdown-content';
@@ -25,15 +31,36 @@ export const Route = createFileRoute('/blog/$slug')({
   head: ({ loaderData }) => {
     if (!loaderData) return {};
     const { locale, post } = loaderData;
-    const canonical = localizeUrl(`${envConfigs.app_url}/blog/${post.slug}`, {
-      locale: locale as any,
-    }).href;
+    const { canonical, links } = localizedPageLinks(
+      `/blog/${encodeURIComponent(post.slug)}`,
+      locale,
+      post.source === 'local' ? undefined : [locale]
+    );
+    const title = `${post.title} | ${envConfigs.app_name}`;
+    const socialImage = post.image || defaultSocialImage();
     return {
       meta: [
-        { title: `${post.title} | ${envConfigs.app_name}` },
+        { title },
         { name: 'description', content: post.description },
+        publicRobotsMeta(),
+        { property: 'og:type', content: 'article' },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: post.description },
+        { property: 'og:url', content: canonical },
+        { property: 'og:site_name', content: envConfigs.app_name },
+        { property: 'og:image', content: socialImage },
+        { property: 'og:image:alt', content: post.title },
+        { property: 'article:published_time', content: post.createdAt },
+        ...(post.authorName
+          ? [{ property: 'article:author', content: post.authorName }]
+          : []),
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: title },
+        { name: 'twitter:description', content: post.description },
+        { name: 'twitter:image', content: socialImage },
+        { name: 'twitter:image:alt', content: post.title },
       ],
-      links: [{ rel: 'canonical', href: canonical }],
+      links,
     };
   },
   component: BlogPostPage,
@@ -41,6 +68,23 @@ export const Route = createFileRoute('/blog/$slug')({
 
 function BlogPostPage() {
   const { locale, post } = Route.useLoaderData();
+  const { canonical } = localizedPageLinks(
+    `/blog/${encodeURIComponent(post.slug)}`,
+    locale,
+    post.source === 'local' ? undefined : [locale]
+  );
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    mainEntityOfPage: canonical,
+    headline: post.title,
+    description: post.description,
+    datePublished: post.createdAt,
+    ...(post.image ? { image: post.image } : {}),
+    ...(post.authorName
+      ? { author: { '@type': 'Person', name: post.authorName } }
+      : {}),
+  };
 
   // Local posts render their bundled MDX component; database posts render
   // raw markdown through MarkdownContent.
@@ -51,6 +95,10 @@ function BlogPostPage() {
     <div className="bg-background text-foreground flex min-h-screen flex-col">
       <Header />
       <main className="flex-1 px-6 py-12 md:px-8 md:py-16">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(articleSchema) }}
+        />
         <article className="mx-auto max-w-3xl">
           <Link
             href="/blog"

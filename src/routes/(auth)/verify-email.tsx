@@ -18,6 +18,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
+import { noIndexHead } from './-seo';
+
 const RESEND_COOLDOWN_SECONDS = 60;
 
 function safeDecodeCallbackUrl(raw?: string | null) {
@@ -299,5 +301,6 @@ function VerifyEmailPage() {
 }
 
 export const Route = createFileRoute('/(auth)/verify-email')({
+  head: noIndexHead,
   component: VerifyEmailPage,
 });

@@ -104,6 +104,7 @@ export interface VoyageCopy {
   disclaimer: string;
   dataNote: string;
   dataCredit: string;
+  navigation: Array<{ href: string; label: string }>;
 }
 
 export interface VoyageSeoCopy {
@@ -342,9 +343,16 @@ export function VoyageExperience({
           </span>
           <span>{copy.brand}</span>
         </a>
-        <a className="voyage-method-link" href="#method">
-          <Info aria-hidden="true" /> {copy.methodLink}
-        </a>
+        <nav className="voyage-method-link" aria-label={copy.brand}>
+          {copy.navigation.map((link) => (
+            <a key={link.href} href={link.href}>
+              {link.label}
+            </a>
+          ))}
+          <a href="#method">
+            <Info aria-hidden="true" /> {copy.methodLink}
+          </a>
+        </nav>
       </header>
 
       <main>
@@ -510,6 +518,13 @@ export function VoyageExperience({
 
       <footer className="voyage-footer">
         <span>{copy.brand}</span>
+        <nav aria-label={copy.brand}>
+          {copy.navigation.map((link) => (
+            <a key={link.href} href={link.href}>
+              {link.label}
+            </a>
+          ))}
+        </nav>
         <p>{copy.disclaimer}</p>
       </footer>
 

@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/card';
 import { Field, FieldDescription, FieldGroup } from '@/components/ui/field';
 
+import { noIndexHead } from './-seo';
+
 const resetSchema = z
   .object({
     password: z.string().min(8),
@@ -184,5 +186,6 @@ function ResetPasswordPage() {
 }
 
 export const Route = createFileRoute('/(auth)/reset-password')({
+  head: noIndexHead,
   component: ResetPasswordPage,
 });

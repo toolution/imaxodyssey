@@ -20,6 +20,8 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 
+import { noIndexHead } from './-seo';
+
 const signUpSchema = z
   .object({
     name: z.string().min(1),
@@ -352,5 +354,6 @@ function SignUpPage() {
 }
 
 export const Route = createFileRoute('/(auth)/sign-up')({
+  head: noIndexHead,
   component: SignUpPage,
 });

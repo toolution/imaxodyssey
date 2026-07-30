@@ -2,8 +2,13 @@ import type { ComponentType } from 'react';
 import { notFound, useLoaderData } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import {
+  defaultSocialImage,
+  localizedPageLinks,
+  publicRobotsMeta,
+} from '@/lib/seo';
 import { m } from '@/paraglide/messages.js';
-import { baseLocale, getLocale, localizeUrl } from '@/paraglide/runtime.js';
+import { baseLocale, getLocale } from '@/paraglide/runtime.js';
 
 type PageMeta = {
   title: string;
@@ -47,15 +52,25 @@ export function staticPageRouteOptions(slug: string) {
     head: ({ loaderData }: { loaderData?: LoaderData }) => {
       if (!loaderData) return {};
       const { meta, locale } = loaderData;
-      const canonical = localizeUrl(`${envConfigs.app_url}/${slug}`, {
-        locale: locale as ReturnType<typeof getLocale>,
-      }).href;
+      const { canonical, links } = localizedPageLinks(`/${slug}`, locale);
+      const socialImage = defaultSocialImage();
       return {
         meta: [
           { title: meta.title },
           { name: 'description', content: meta.description },
+          publicRobotsMeta(),
+          { property: 'og:type', content: 'website' },
+          { property: 'og:title', content: meta.title },
+          { property: 'og:description', content: meta.description },
+          { property: 'og:url', content: canonical },
+          { property: 'og:site_name', content: envConfigs.app_name },
+          { property: 'og:image', content: socialImage },
+          { name: 'twitter:card', content: 'summary_large_image' },
+          { name: 'twitter:title', content: meta.title },
+          { name: 'twitter:description', content: meta.description },
+          { name: 'twitter:image', content: socialImage },
         ],
-        links: [{ rel: 'canonical', href: canonical }],
+        links,
       };
     },
     component: StaticPage,

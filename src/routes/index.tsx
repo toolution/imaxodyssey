@@ -1,7 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
-import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
+import {
+  defaultSocialImage,
+  localizedPageLinks,
+  publicRobotsMeta,
+} from '@/lib/seo';
+import { getLocale } from '@/paraglide/runtime.js';
 import { Voyage } from '@/blocks/voyage';
 import * as m from '@/blocks/voyage-messages';
 
@@ -21,15 +26,13 @@ export const Route = createFileRoute('/')({
   },
   head: ({ loaderData }) => {
     const locale = loaderData?.locale ?? 'en';
-    const urlFor = (loc: string) =>
-      localizeUrl(`${envConfigs.app_url}/`, { locale: loc as any }).href;
     const title = m['voyage.metadata.title']({}, { locale: locale as any });
     const description = m['voyage.metadata.description'](
       {},
       { locale: locale as any }
     );
-    const canonicalUrl = urlFor(locale);
-    const socialImage = `${envConfigs.app_url}/favicon.png`;
+    const { canonical: canonicalUrl, links } = localizedPageLinks('/', locale);
+    const socialImage = defaultSocialImage();
     return {
       meta: [
         { title },
@@ -37,10 +40,7 @@ export const Route = createFileRoute('/')({
           name: 'description',
           content: description,
         },
-        {
-          name: 'robots',
-          content: 'index, follow, max-image-preview:large',
-        },
+        publicRobotsMeta(),
         { property: 'og:type', content: 'website' },
         { property: 'og:title', content: title },
         { property: 'og:description', content: description },
@@ -60,15 +60,7 @@ export const Route = createFileRoute('/')({
         { name: 'twitter:description', content: description },
         { name: 'twitter:image', content: socialImage },
       ],
-      links: [
-        { rel: 'canonical', href: urlFor(locale) },
-        ...locales.map((loc) => ({
-          rel: 'alternate',
-          hrefLang: loc,
-          href: urlFor(loc),
-        })),
-        { rel: 'alternate', hrefLang: 'x-default', href: urlFor('en') },
-      ],
+      links,
     };
   },
   component: HomePage,

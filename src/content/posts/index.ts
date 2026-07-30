@@ -11,10 +11,7 @@ import { baseLocale } from '@/paraglide/runtime.js';
  * fetched through the server functions in ./server.ts and merged with the
  * local posts via the pure helpers below.
  */
-export const BLOG_POST_SLUGS = [
-  'what-is-shipany',
-  'blocks-vs-components',
-] as const;
+export const BLOG_POST_SLUGS = [] as const;
 
 export type BlogPostMeta = {
   title: string;
@@ -35,8 +32,8 @@ export type BlogPost = {
   title: string;
   description: string;
   image?: string;
-  /** ISO date string — serializable across loader/server-fn boundaries */
-  createdAt: string;
+  /** ISO update date when the source exposes one */
+  updatedAt?: string;
   authorName?: string;
   authorImage?: string;
   source: 'local' | 'db';

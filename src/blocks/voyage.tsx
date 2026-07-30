@@ -110,6 +110,28 @@ export function Voyage() {
         disclaimer: m['voyage.disclaimer'](),
         dataNote: m['voyage.data_note'](),
         dataCredit: m['voyage.data_credit'](),
+        navigation: [
+          {
+            href: localizeUrl(`${envConfigs.app_url}/pricing`, { locale }).href,
+            label: m['voyage.nav.pricing'](),
+          },
+          {
+            href: localizeUrl(`${envConfigs.app_url}/blog`, { locale }).href,
+            label: m['voyage.nav.blog'](),
+          },
+          {
+            href: localizeUrl(`${envConfigs.app_url}/privacy-policy`, {
+              locale,
+            }).href,
+            label: m['voyage.nav.privacy'](),
+          },
+          {
+            href: localizeUrl(`${envConfigs.app_url}/terms-of-service`, {
+              locale,
+            }).href,
+            label: m['voyage.nav.terms'](),
+          },
+        ],
       }}
       seo={{
         canonicalUrl,
