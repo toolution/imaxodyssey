@@ -21,6 +21,7 @@
     "rbac:assign": "tsx scripts/with-env.ts tsx scripts/assign-role.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test:voyage": "tsx scripts/test-voyage-odyssey.ts",
     "prepare": "husky"
   },
   "lint-staged": {

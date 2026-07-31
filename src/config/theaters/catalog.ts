@@ -616,6 +616,139 @@ const curatedTheaterCatalog: TheaterCapability[] = [
     confidence: 'medium',
   },
   {
+    id: 'pathe-odysseum-montpellier',
+    name: 'Pathé Odysseum',
+    city: 'Montpellier',
+    region: '',
+    country: 'FR',
+    latitude: 43.6112,
+    longitude: 3.8767,
+    formats: ['IMAX 15/70mm', 'IMAX with Laser'],
+    projector: 'IMAX 15/70 film + Laser',
+    aspectRatio: 'Up to 1.43:1 on film',
+    has1570: true,
+    hasGtLaser: false,
+    worthVoyage: true,
+    screeningStatus: 'unknown',
+    verifiedAt: '2026-07-30',
+    sourceUrl: 'https://www.imax.com/zh/us/news/the-odyssey-in-imax-70mm-film',
+    confidence: 'high',
+  },
+  {
+    id: 'regal-la-live',
+    name: 'Regal LA Live',
+    city: 'Los Angeles',
+    region: 'CA',
+    country: 'US',
+    latitude: 34.0448,
+    longitude: -118.2645,
+    formats: ['IMAX 15/70mm'],
+    projector: 'IMAX 15/70 film',
+    aspectRatio: 'Up to 1.43:1 on film',
+    has1570: true,
+    hasGtLaser: false,
+    worthVoyage: true,
+    screeningStatus: 'unknown',
+    verifiedAt: '2026-07-30',
+    sourceUrl: 'https://www.imax.com/zh/us/news/the-odyssey-in-imax-70mm-film',
+    confidence: 'high',
+  },
+  {
+    id: 'cinemark-carefree-circle',
+    name: 'Cinemark Carefree Circle & IMAX',
+    city: 'Colorado Springs',
+    region: 'CO',
+    country: 'US',
+    latitude: 38.8983,
+    longitude: -104.7527,
+    formats: ['IMAX 15/70mm'],
+    projector: 'IMAX 15/70 film',
+    aspectRatio: 'Up to 1.43:1 on film',
+    has1570: true,
+    hasGtLaser: false,
+    worthVoyage: true,
+    screeningStatus: 'unknown',
+    verifiedAt: '2026-07-30',
+    sourceUrl: 'https://www.imax.com/zh/us/news/the-odyssey-in-imax-70mm-film',
+    confidence: 'high',
+  },
+  {
+    id: 'regal-colorado-center',
+    name: 'Regal Colorado Center 9 & IMAX',
+    city: 'Denver',
+    region: 'CO',
+    country: 'US',
+    latitude: 39.7423,
+    longitude: -104.9915,
+    formats: ['IMAX 15/70mm'],
+    projector: 'IMAX 15/70 film',
+    aspectRatio: 'Up to 1.43:1 on film',
+    has1570: true,
+    hasGtLaser: false,
+    worthVoyage: true,
+    screeningStatus: 'unknown',
+    verifiedAt: '2026-07-30',
+    sourceUrl: 'https://www.imax.com/zh/us/news/the-odyssey-in-imax-70mm-film',
+    confidence: 'high',
+  },
+  {
+    id: 'cinemark-seven-bridges',
+    name: 'Cinemark Seven Bridges & IMAX',
+    city: 'Woodridge',
+    region: 'IL',
+    country: 'US',
+    latitude: 41.7427,
+    longitude: -88.049,
+    formats: ['IMAX 15/70mm'],
+    projector: 'IMAX 15/70 film',
+    aspectRatio: 'Up to 1.43:1 on film',
+    has1570: true,
+    hasGtLaser: false,
+    worthVoyage: true,
+    screeningStatus: 'unknown',
+    verifiedAt: '2026-07-30',
+    sourceUrl: 'https://www.imax.com/zh/us/news/the-odyssey-in-imax-70mm-film',
+    confidence: 'high',
+  },
+  {
+    id: 'brenden-palms',
+    name: 'Brenden Palms 14 & IMAX',
+    city: 'Las Vegas',
+    region: 'NV',
+    country: 'US',
+    latitude: 36.1157,
+    longitude: -115.1983,
+    formats: ['IMAX 15/70mm'],
+    projector: 'IMAX 15/70 film',
+    aspectRatio: 'Up to 1.43:1 on film',
+    has1570: true,
+    hasGtLaser: false,
+    worthVoyage: true,
+    screeningStatus: 'unknown',
+    verifiedAt: '2026-07-30',
+    sourceUrl: 'https://www.imax.com/zh/us/news/the-odyssey-in-imax-70mm-film',
+    confidence: 'high',
+  },
+  {
+    id: 'cineplex-bayers-lake',
+    name: "Cineplex Theatres Bayer's Lake 18 & IMAX",
+    city: 'Halifax',
+    region: 'NS',
+    country: 'CA',
+    latitude: 44.6512,
+    longitude: -63.6702,
+    formats: ['IMAX 15/70mm'],
+    projector: 'IMAX 15/70 film',
+    aspectRatio: 'Up to 1.43:1 on film',
+    has1570: true,
+    hasGtLaser: false,
+    worthVoyage: true,
+    screeningStatus: 'unknown',
+    verifiedAt: '2026-07-30',
+    sourceUrl: 'https://www.imax.com/zh/us/news/the-odyssey-in-imax-70mm-film',
+    confidence: 'high',
+  },
+  {
     id: 'cineplex-metrotown',
     name: 'Cineplex Cinemas Metropolis',
     city: 'Burnaby',
@@ -638,6 +771,7 @@ const curatedTheaterCatalog: TheaterCapability[] = [
 
 const replacementIds = new Set([
   'imaxguide-us-reading-sunbrella-imax-3d-theater-reading',
+  'imaxguide-fr-montpellier-gaumont-montpellier-multiplexe-imax',
 ]);
 
 function theaterNameTokens(value: string) {
@@ -670,16 +804,91 @@ function sameTheater(curated: TheaterCapability, imported: TheaterCapability) {
   );
 }
 
-export const theaterCatalog: TheaterCapability[] = [
+const officialOdyssey70mmConfirmation = {
+  sourceUrl: 'https://www.imax.com/zh/us/news/the-odyssey-in-imax-70mm-film',
+  verifiedAt: '2026-07-30',
+} as const;
+
+// IMAX's official July 30, 2026 list of participating The Odyssey IMAX 70mm
+// engagements. Keep this distinct from each venue's equipment source.
+const officialOdyssey70mmTheaterIds = new Set([
+  'amc-lincoln-square-13',
+  'amc-metreon-16',
+  'universal-citywalk-hollywood',
+  'regal-irvine-spectrum',
+  'regal-ontario-palace',
+  'harkins-arizona-mills',
+  'cinemark-dallas-17',
+  'amc-rivercenter-11',
+  'indiana-state-museum',
+  'celebration-grand-rapids',
+  'regal-opry-mills',
+  'regal-mall-of-georgia',
+  'autonation-imax',
+  'providence-place',
+  'tennessee-aquarium',
+  'scotiabank-toronto',
+  'cineplex-vaughan',
+  'cineplex-mississauga',
+  'cineplex-langley',
+  'scotiabank-chinook',
+  'cineplex-bayers-lake',
+  'pathe-odysseum-montpellier',
+  'regal-la-live',
+  'cinemark-carefree-circle',
+  'regal-colorado-center',
+  'cinemark-seven-bridges',
+  'brenden-palms',
+  'imaxguide-us-dublin-regal-hacienda-crossings-imax',
+  'imaxguide-us-hollywood-tcl-chinese-theatres-imax',
+  'imaxguide-us-sacramento-esquire-imax-theatre',
+  'imaxguide-us-rochester-cinemark-tinseltown-rochester-and-imax',
+  'imaxguide-us-king-of-prussia-regal-ua-king-of-prussia-imax',
+  'imaxguide-ca-edmonton-scotiabank-edmonton-imax',
+  'imaxguide-ca-richmond-silvercity-riverport-imax',
+  'imaxguide-ca-halifax-scotiabank-halifax-imax',
+  'imaxguide-gb-london-bfi-imax-british-film-institute',
+  'imaxguide-gb-london-imax-the-ronson-theatre-at-the-science-museum',
+  'imaxguide-gb-manchester-vue-manchester-imax-the-printworks',
+  'imaxguide-au-melbourne-imax-melbourne-museum',
+  'imaxguide-be-brussels-kinepolis-brussels-imax',
+  'imaxguide-cz-prague-imax-theatre-palace-flora',
+]);
+
+const mergedTheaterCatalog = [
   ...curatedTheaterCatalog,
   ...imaxGuideCatalog.filter(
     (imported) =>
       !replacementIds.has(imported.id) &&
       !curatedTheaterCatalog.some((curated) => sameTheater(curated, imported))
   ),
-].sort(
-  (left, right) =>
-    left.country.localeCompare(right.country) ||
-    left.city.localeCompare(right.city) ||
-    left.name.localeCompare(right.name)
-);
+];
+
+for (const id of officialOdyssey70mmTheaterIds) {
+  const theater = mergedTheaterCatalog.find((candidate) => candidate.id === id);
+  if (!theater) {
+    throw new Error(`Missing official Odyssey IMAX 70mm theater: ${id}`);
+  }
+  if (!theater.has1570) {
+    throw new Error(
+      `Official Odyssey IMAX 70mm theater is not marked 15/70: ${id}`
+    );
+  }
+}
+
+export const theaterCatalog: TheaterCapability[] = mergedTheaterCatalog
+  .map((theater) =>
+    officialOdyssey70mmTheaterIds.has(theater.id)
+      ? {
+          ...theater,
+          screeningStatus: 'confirmed',
+          screeningConfirmation: officialOdyssey70mmConfirmation,
+        }
+      : theater
+  )
+  .sort(
+    (left, right) =>
+      left.country.localeCompare(right.country) ||
+      left.city.localeCompare(right.city) ||
+      left.name.localeCompare(right.name)
+  );

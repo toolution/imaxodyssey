@@ -6,6 +6,11 @@ export type VoyageMission =
 
 export type ScreeningStatus = 'confirmed' | 'not-confirmed' | 'unknown';
 
+export interface ScreeningConfirmation {
+  sourceUrl: string;
+  verifiedAt: string;
+}
+
 export interface TheaterCapability {
   id: string;
   name: string;
@@ -23,6 +28,7 @@ export interface TheaterCapability {
   hasGtLaser: boolean;
   worthVoyage: boolean;
   screeningStatus: ScreeningStatus;
+  screeningConfirmation?: ScreeningConfirmation;
   commercialFilms?: 'yes' | 'limited' | 'no' | 'unknown';
   verifiedAt: string;
   sourceUrl: string;
@@ -41,6 +47,23 @@ export interface VoyageTheaterMatch {
   theater: TheaterCapability;
   distanceMeters: number;
   formatScore: number;
+}
+
+export function compareVoyageCandidates(
+  mission: VoyageMission,
+  left: Pick<VoyageTheaterMatch, 'theater' | 'distanceMeters'>,
+  right: Pick<VoyageTheaterMatch, 'theater' | 'distanceMeters'>
+) {
+  if (mission === '70mm-only') {
+    const confirmationDifference =
+      Number(right.theater.screeningStatus === 'confirmed') -
+      Number(left.theater.screeningStatus === 'confirmed');
+    if (confirmationDifference) return confirmationDifference;
+  }
+  return (
+    left.distanceMeters - right.distanceMeters ||
+    left.theater.id.localeCompare(right.theater.id)
+  );
 }
 
 export interface VoyageSearchResult {

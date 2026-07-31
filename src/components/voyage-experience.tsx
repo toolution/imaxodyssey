@@ -771,7 +771,11 @@ function TheaterIsland({
           <Navigation aria-hidden="true" /> {copy.openDirections}{' '}
           <ExternalLink aria-hidden="true" />
         </a>
-        <a href={theater.sourceUrl} target="_blank" rel="noreferrer">
+        <a
+          href={theater.screeningConfirmation?.sourceUrl ?? theater.sourceUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
           {copy.source} <ExternalLink aria-hidden="true" />
         </a>
       </div>

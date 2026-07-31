@@ -1,8 +1,9 @@
 import { theaterCatalog } from '@/config/theaters/catalog';
-import type {
-  TheaterCapability,
-  VoyageMission,
-  VoyageSearchResult,
+import {
+  compareVoyageCandidates,
+  type TheaterCapability,
+  type VoyageMission,
+  type VoyageSearchResult,
 } from '@/lib/voyage';
 
 interface LocalDeparture {
@@ -99,7 +100,7 @@ export async function searchVoyages(
         formatScore: formatScore(theater),
       };
     })
-    .sort((a, b) => a.distanceMeters - b.distanceMeters);
+    .sort((left, right) => compareVoyageCandidates(mission, left, right));
 
   if (!eligible.length)
     throw new Error('No matching theater is available in the current catalog.');
